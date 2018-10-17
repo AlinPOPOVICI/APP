@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Yamba</string>
+    <string name="Tweet_button">Tweet</string>
+    <string name="Tweet_msg_box">Type your tweet...</string>
+</resources>
