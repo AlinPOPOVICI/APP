@@ -1,11 +1,15 @@
 package com.example.alin.yamba;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.app.Fragment;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +25,7 @@ import com.marakana.android.yamba.clientlib.YambaClient;
 import com.marakana.android.yamba.clientlib.YambaClientException;
 
 public class StatusFragment extends Fragment implements OnClickListener {
+    SharedPreferences prefs;
     private static final String TAG = "StatusFragment";
     private EditText editStatus;
     private Button buttonTweet;
@@ -74,10 +79,16 @@ public class StatusFragment extends Fragment implements OnClickListener {
     private final class PostTask extends AsyncTask<String, Void, String> {
         @Override
         protected String doInBackground(String... params) {
-            YambaClient yambaCloud =
-                    new YambaClient("student", "password");
             try {
-                yambaCloud.postStatus(params[0]);
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+                String username = prefs.getString("username", "");
+                String password = prefs.getString("password", "");
+                if(TextUtils.isEmpty(username)||TextUtils.isEmpty(password)){
+                    getActivity().startActivity(new Intent(getActivity(), SettingsActivity.class));
+                    return "Please update username and password";
+                }
+                YambaClient cloud = new YambaClient(username, password);
+                cloud.postStatus(params[0]);
                 return "Successfully posted";
             } catch (YambaClientException e) {
                 e.printStackTrace();
