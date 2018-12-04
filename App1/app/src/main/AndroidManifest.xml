@@ -9,7 +9,7 @@
          location permissions for the 'MyLocation' functionality. 
     -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION"/>
+    <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
 
     <application
         android:allowBackup="true"
@@ -34,21 +34,37 @@
         <meta-data
             android:name="com.google.android.awareness.API_KEY"
             android:value="AIzaSyCO9Z4iAkSLn4jBJVsK3OGLWPYPCJr8SZ0" />
+        <meta-data
+            android:name="android.support.PARENT_ACTIVITY"
+            android:value=".MainActivity" />
+        <uses-library android:name="org.apache.http.legacy" android:required="false" />
 
         <activity
             android:name=".MapsActivity"
+            android:parentActivityName=".MainActivity"
             android:label="@string/title_activity_maps">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
 
         <service
             android:name=".AwarenessService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
+
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/title_activity_main"
+            android:theme="@style/AppTheme.NoActionBar" >
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".SnapshotActivity"
+            android:label="@string/title_activity_snapshot"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>
