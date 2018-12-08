@@ -28,16 +28,16 @@ public class Data {
     private int weatherCondition;
 
     @ColumnInfo (name = "weather_celsius")
-    private int weatherCelsius;
+    private float weatherCelsius;
 
     @ColumnInfo (name = "activity")
     private int activity;
 
     @ColumnInfo (name = "location_latitude")
-    private int locationLatitude;
+    private double locationLatitude;
 
     @ColumnInfo (name = "location_longitude")
-    private int locationLongitude;
+    private double locationLongitude;
 
     public Date getTime() {
         return time;
@@ -71,11 +71,11 @@ public class Data {
         this.weatherCondition = weatherCondition;
     }
 
-    public int getWeatherCelsius() {
+    public float getWeatherCelsius() {
         return weatherCelsius;
     }
 
-    public void setWeatherCelsius(int weatherCelsius) {
+    public void setWeatherCelsius(float weatherCelsius) {
         this.weatherCelsius = weatherCelsius;
     }
 
@@ -87,19 +87,19 @@ public class Data {
         this.activity = activity;
     }
 
-    public int getLocationLatitude() {
+    public double getLocationLatitude() {
         return locationLatitude;
     }
 
-    public void setLocationLatitude(int locationLatitude) {
+    public void setLocationLatitude(double locationLatitude) {
         this.locationLatitude = locationLatitude;
     }
 
-    public int getLocationLongitude() {
+    public double getLocationLongitude() {
         return locationLongitude;
     }
 
-    public void setLocationLongitude(int locationLongitude) {
+    public void setLocationLongitude(double locationLongitude) {
         this.locationLongitude = locationLongitude;
     }
 

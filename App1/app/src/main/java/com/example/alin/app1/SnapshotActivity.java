@@ -1,14 +1,16 @@
 package com.example.alin.app1;
 
 import android.Manifest;
+
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -37,7 +39,8 @@ import java.util.List;
 
 public class SnapshotActivity extends AppCompatActivity {
 
-
+    private DataViewModel myViewModel;
+    private Data data;
 
     private static final String TAG = "SnapshotActivity";
     private static final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 10001;
@@ -62,6 +65,8 @@ public class SnapshotActivity extends AppCompatActivity {
                 .build();
         mGoogleApiClient.connect();
 
+        myViewModel = ViewModelProviders.of(this).get(DataViewModel.class);
+
         mUserActivityTextView = (TextView) findViewById(R.id.userActivityTextView);
         mLocationTextView = (TextView) findViewById(R.id.locationTextView);
         mBeaconTextView = (TextView) findViewById(R.id.beaconTextView);
@@ -83,6 +88,7 @@ public class SnapshotActivity extends AppCompatActivity {
 
     public void getSnapshots() {
         // User Activity
+        data = new Data();
         Awareness.SnapshotApi.getDetectedActivity(mGoogleApiClient)
                 .setResultCallback(new ResultCallback<DetectedActivityResult>() {
                     @Override
@@ -91,6 +97,7 @@ public class SnapshotActivity extends AppCompatActivity {
                             Log.e(TAG, "Could not detect user activity");
                             mUserActivityTextView.setText("--Could not detect user activity--");
                             mUserActivityTextView.setTextColor(Color.RED);
+                            data.setActivity(-13);
                             return;
                         }
                         ActivityRecognitionResult arResult = detectedActivityResult.getActivityRecognitionResult();
@@ -98,6 +105,7 @@ public class SnapshotActivity extends AppCompatActivity {
                         Log.i(TAG, probableActivity.toString());
                         mUserActivityTextView.setText(probableActivity.toString());
                         mUserActivityTextView.setTextColor(Color.GREEN);
+                        data.setActivity(probableActivity.getType());
                     }
                 });
 
@@ -111,10 +119,12 @@ public class SnapshotActivity extends AppCompatActivity {
                             Log.e(TAG, "Could not detect headphone state");
                             mHeadphonesTextView.setText("Could not detect headphone state");
                             mHeadphonesTextView.setTextColor(Color.RED);
+                            data.setHeadphoneState(-13);
                             return;
                         }
 
                         HeadphoneState headphoneState = headphoneStateResult.getHeadphoneState();
+                        data.setHeadphoneState(headphoneState.getState());
                         if (headphoneState.getState() == HeadphoneState.PLUGGED_IN) {
                             mHeadphonesTextView.setText("Headphones plugged in");
                             mHeadphonesTextView.setTextColor(Color.GREEN);
@@ -132,7 +142,7 @@ public class SnapshotActivity extends AppCompatActivity {
         Calendar calendar = Calendar.getInstance();
         mTimeTextView.setText(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(calendar.getTime()));
         mTimeTextView.setTextColor(Color.GREEN);
-
+        data.setTime(calendar.getTime());
         getFineLocationSnapshots();
     }
 
@@ -157,12 +167,16 @@ public class SnapshotActivity extends AppCompatActivity {
                             if (!locationResult.getStatus().isSuccess()) {
                                 Log.e(TAG, "Could not detect user location");
                                 mLocationTextView.setText("Could not detect user location");
+                                data.setLocationLatitude(-13);
+                                data.setLocationLongitude(-13);
                                 mLocationTextView.setTextColor(Color.RED);
                                 return;
                             }
                             Location location = locationResult.getLocation();
                             mLocationTextView.setText(location.toString());
                             mLocationTextView.setTextColor(Color.GREEN);
+                            data.setLocationLatitude(location.getLatitude());
+                            data.setLocationLongitude(location.getLongitude());
                         }
                     });
 
@@ -208,10 +222,14 @@ public class SnapshotActivity extends AppCompatActivity {
                                 Log.e(TAG, "Could not detect weather info");
                                 mWeatherTextView.setText("Could not detect weather info");
                                 mWeatherTextView.setTextColor(Color.RED);
+                                data.setWeatherCelsius(-13);
+                                data.setWeatherCondition(-13);
                                 return;
                             }
                             Weather weather = weatherResult.getWeather();
                             mWeatherTextView.setText(weather.toString());
+                            data.setWeatherCelsius(weatherResult.getWeather().getTemperature(2));
+                            data.setWeatherCondition(weatherResult.getWeather().getConditions()[0]);
                         }
                     });
 

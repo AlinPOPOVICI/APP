@@ -1,31 +1,33 @@
 package com.example.alin.app1;
 
+import android.app.PendingIntent;
 import android.app.Service;
-import android.arch.persistence.room.Database;
-import android.arch.persistence.room.Room;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
+import android.util.Log;
+
 import com.google.android.gms.awareness.Awareness;
 import com.google.android.gms.awareness.fence.AwarenessFence;
-import com.google.android.gms.awareness.fence.DetectedActivityFence;
-import com.google.android.gms.awareness.fence.FenceState;
 import com.google.android.gms.awareness.fence.FenceUpdateRequest;
 import com.google.android.gms.awareness.fence.HeadphoneFence;
-import com.google.android.gms.awareness.snapshot.DetectedActivityResponse;
-import com.google.android.gms.awareness.snapshot.HeadphoneStateResponse;
-import com.google.android.gms.awareness.snapshot.WeatherResponse;
 import com.google.android.gms.awareness.state.HeadphoneState;
-import com.google.android.gms.awareness.state.Weather;
-
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 
 public class AwarenessService extends Service {
-
+    private static final String TAG = "FenceAwarenessService";
 
     private android.content.Context context;
     private GoogleApiClient client;
- //  private static final String DATABASE_NAME = “data_db” ;
- //   private AppDatabase appDatabase;
+    private FenceBroadcastReceiver mFenceReceiver;
+
+    private static final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 10001;
+    private static final String MY_FENCE_RECEIVER_ACTION = "MY_FENCE_ACTION";
+    public static final String HEADPHONE_FENCE_KEY = "HeadphoneFenceKey";
+
 
     public AwarenessService() {
     }
@@ -39,44 +41,42 @@ public class AwarenessService extends Service {
     @Override
     public void onCreate(){
         super.onCreate();
-     //   appDatabase = Room.databaseBuilder(getApplicationContext(),
-      //          AppDatabase.class, DATABASE_NAME)
-      //          .fallbackToDesctructiveMigration()
-      //         .build();
-       /* client = new GoogleApiClient.Builder(context)
+        client = new GoogleApiClient.Builder(context)
                 .addApi(Awareness.API)
                 .build();
-        client.connect();*/
+        client.connect();
+
+        mFenceReceiver = new FenceBroadcastReceiver();
+        registerReceiver(mFenceReceiver, new IntentFilter(MY_FENCE_RECEIVER_ACTION));
 
     }
+
+    private void addHeadphoneFence() {
+
+        Intent intent = new Intent(MY_FENCE_RECEIVER_ACTION);
+        PendingIntent mFencePendingIntent = PendingIntent.getBroadcast(AwarenessService.this, 10001, intent, 0);
+        AwarenessFence headphoneFence = HeadphoneFence.during(HeadphoneState.PLUGGED_IN);
+        Awareness.FenceApi.updateFences(
+                client,
+                new FenceUpdateRequest.Builder()
+                        .addFence(HEADPHONE_FENCE_KEY, headphoneFence, mFencePendingIntent)
+                        .build())
+                .setResultCallback(new ResultCallback<Status>() {
+
+                    @Override
+                    public void onResult(@NonNull Status status) {
+                        if (status.isSuccess()) {
+                            Log.i(TAG, "Fence was successfully registered.");
+                        } else {
+                            Log.e(TAG, "Fence could not be registered: " + status);
+                        }
+                    }
+                });
+    }
+
 }
 
 /*
-        import android.app.PendingIntent;
-        import android.content.Intent;
-        import android.content.IntentFilter;
-        import android.support.annotation.NonNull;
-        import android.support.v7.app.AppCompatActivity;
-        import android.os.Bundle;
-        import android.util.Log;
-        import android.view.View;
-        import android.widget.Button;
-        import android.widget.Toast;
-
-        import com.google.android.gms.awareness.Awareness;
-        import com.google.android.gms.awareness.fence.AwarenessFence;
-        import com.google.android.gms.awareness.fence.BeaconFence;
-        import com.google.android.gms.awareness.fence.DetectedActivityFence;
-        import com.google.android.gms.awareness.fence.FenceUpdateRequest;
-        import com.google.android.gms.awareness.fence.HeadphoneFence;
-        import com.google.android.gms.awareness.fence.LocationFence;
-        import com.google.android.gms.awareness.state.HeadphoneState;
-        import com.google.android.gms.common.api.GoogleApiClient;
-        import com.google.android.gms.common.api.ResultCallback;
-        import com.google.android.gms.common.api.ResultCallbacks;
-        import com.google.android.gms.common.api.Status;
-
-
 
 public class FenceActivity extends AppCompatActivity {
 

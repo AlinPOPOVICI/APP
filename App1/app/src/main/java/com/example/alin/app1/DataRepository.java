@@ -9,7 +9,7 @@ import java.util.List;
 
 
 class DataRepository {
-    
+
     private DataDao myDao;
     private LiveData<List<Data>> mAllData;
 
