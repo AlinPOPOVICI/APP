@@ -39,8 +39,8 @@ import java.util.List;
 
 public class SnapshotActivity extends AppCompatActivity {
 
-    private DataViewModel myViewModel;
     private Data data;
+    private DataViewModel mDataViewModel;
 
     private static final String TAG = "SnapshotActivity";
     private static final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 10001;
@@ -65,8 +65,6 @@ public class SnapshotActivity extends AppCompatActivity {
                 .build();
         mGoogleApiClient.connect();
 
-        myViewModel = ViewModelProviders.of(this).get(DataViewModel.class);
-
         mUserActivityTextView = (TextView) findViewById(R.id.userActivityTextView);
         mLocationTextView = (TextView) findViewById(R.id.locationTextView);
         mBeaconTextView = (TextView) findViewById(R.id.beaconTextView);
@@ -82,6 +80,7 @@ public class SnapshotActivity extends AppCompatActivity {
                 getSnapshots();
             }
         });
+        mDataViewModel = ViewModelProviders.of(this).get(DataViewModel.class);
 
     }
 
@@ -144,6 +143,8 @@ public class SnapshotActivity extends AppCompatActivity {
         mTimeTextView.setTextColor(Color.GREEN);
         data.setTime(calendar.getTime());
         getFineLocationSnapshots();
+        mDataViewModel.insert(data);
+
     }
 
     private void getFineLocationSnapshots() {
