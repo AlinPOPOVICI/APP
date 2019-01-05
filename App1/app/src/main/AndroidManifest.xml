@@ -45,11 +45,9 @@
         <activity
             android:name=".MapsActivity"
             android:label="@string/title_activity_maps"
-            android:parentActivityName=".MainActivity"></activity>
+            android:parentActivityName=".MainActivity" />
 
-        <service
-            android:name=".AwarenessService"
-            />
+        <service android:name=".AwarenessService" />
 
         <activity
             android:name=".MainActivity"
@@ -68,6 +66,10 @@
 
         <service
             android:name=".MyService"
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name=".SnapshotService"
             android:enabled="true"
             android:exported="true"></service>
     </application>

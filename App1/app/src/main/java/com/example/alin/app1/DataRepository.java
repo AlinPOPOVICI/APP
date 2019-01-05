@@ -19,6 +19,7 @@ class DataRepository {
         myDao = db.dataDao();
     }
 
+
     LiveData<List<Data>> getAllData() {
         return mAllData;
     }
