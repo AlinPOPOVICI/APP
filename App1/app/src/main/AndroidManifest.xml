@@ -71,7 +71,12 @@
         <service
             android:name=".SnapshotService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
+
+        <activity
+            android:name=".AppSetupActivity"
+            android:label="@string/title_activity_app_setup"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>
