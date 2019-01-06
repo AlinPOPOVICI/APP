@@ -1,6 +1,8 @@
 package com.example.alin.app1;
 
-public class Aplicatie {
+import java.io.Serializable;
+
+public class Aplicatie implements Serializable {
     public Aplicatie(String Name) {
         this.title = Name;
     }

@@ -76,6 +76,10 @@
         <activity
             android:name=".AppSetupActivity"
             android:label="@string/title_activity_app_setup"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".AplicatieActivity"
+            android:label="@string/title_activity_aplicatie"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
