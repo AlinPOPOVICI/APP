@@ -1,7 +1,6 @@
 package com.example.alin.app1;
 
 import android.Manifest;
-
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -39,6 +38,7 @@ import java.util.List;
 
 public class SnapshotActivity extends AppCompatActivity {
 
+    //private DataViewModel myViewModel;
     private Data data;
     private DataViewModel mDataViewModel;
 
@@ -64,6 +64,8 @@ public class SnapshotActivity extends AppCompatActivity {
                 .addApi(Awareness.API)
                 .build();
         mGoogleApiClient.connect();
+
+        //myViewModel = ViewModelProviders.of(this).get(DataViewModel.class);
 
         mUserActivityTextView = (TextView) findViewById(R.id.userActivityTextView);
         mLocationTextView = (TextView) findViewById(R.id.locationTextView);
@@ -217,6 +219,7 @@ public class SnapshotActivity extends AppCompatActivity {
             // Weather
             Awareness.SnapshotApi.getWeather(mGoogleApiClient)
                     .setResultCallback(new ResultCallback<WeatherResult>() {
+
                         @Override
                         public void onResult(@NonNull WeatherResult weatherResult) {
                             if (!weatherResult.getStatus().isSuccess()) {
@@ -227,10 +230,18 @@ public class SnapshotActivity extends AppCompatActivity {
                                 data.setWeatherCondition(-13);
                                 return;
                             }
+
                             Weather weather = weatherResult.getWeather();
-                            mWeatherTextView.setText(weather.toString());
-                            data.setWeatherCelsius(weatherResult.getWeather().getTemperature(2));
-                            data.setWeatherCondition(weatherResult.getWeather().getConditions()[0]);
+                            if(weather != null) {
+                                mWeatherTextView.setText(weather.toString());
+                                data.setWeatherCelsius(weatherResult.getWeather().getTemperature(2));
+                                data.setWeatherCondition(weatherResult.getWeather().getConditions()[0]);
+                            }else{
+                                mWeatherTextView.setText("Could not detect weather info");
+                                mWeatherTextView.setTextColor(Color.RED);
+                                data.setWeatherCelsius(-13);
+                                data.setWeatherCondition(-13);
+                            }
                         }
                     });
 

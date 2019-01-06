@@ -1,19 +1,12 @@
 package com.example.alin.app1;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.EditText;
-
-import com.google.android.gms.awareness.Awareness;
-import com.google.android.gms.common.api.GoogleApiClient;
 
 public class MainActivity extends AppCompatActivity {
    // private GoogleApiClient client;
@@ -38,12 +31,17 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
-        Intent intent = new Intent(MainActivity.this, AwarenessService.class);
-        startService(intent);
+       // Intent intent = new Intent(MainActivity.this, AwarenessService.class);
+        //startService(intent);
     }
 
     public void start_Maps(View view) {
         Intent intent = new Intent(this, MapsActivity.class);
+        startActivity(intent);
+    }
+
+    public void start_AppSetup(View view) {
+        Intent intent = new Intent(this, AppSetupActivity.class);
         startActivity(intent);
     }
 

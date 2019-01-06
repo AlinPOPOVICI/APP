@@ -72,13 +72,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
         //mDataViewModel.getAllData();
-        circle = mMap.addCircle(new CircleOptions()
+       /* circle = mMap.addCircle(new CircleOptions()
                 .center(new LatLng(37.422, -122.084))
                 .radius(1000)
                 .strokeWidth(10)
                 .strokeColor(Color.GREEN)
                 .fillColor(Color.argb(128, 255, 0, 0))
-                .clickable(true));
+                .clickable(true));*/
 
     }
 }
