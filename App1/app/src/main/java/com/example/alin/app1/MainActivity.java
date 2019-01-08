@@ -31,8 +31,10 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
-       // Intent intent = new Intent(MainActivity.this, AwarenessService.class);
-        //startService(intent);
+        Intent intent = new Intent(MainActivity.this, AwarenessService.class);
+        startService(intent);
+        Intent inten = new Intent(MainActivity.this, SnapshotService.class);
+        startService(inten);
     }
 
     public void start_Maps(View view) {

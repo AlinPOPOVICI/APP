@@ -62,14 +62,19 @@ public class AwarenessService extends Service {
                 .build();
         client.connect();
 
-        mFenceReceiver = new FenceBroadcastReceiver();
-        registerReceiver(mFenceReceiver, new IntentFilter(MY_FENCE_RECEIVER_ACTION));
+        //mFenceReceiver = new FenceBroadcastReceiver();
+       // registerReceiver(mFenceReceiver, new IntentFilter(MY_FENCE_RECEIVER_ACTION));
         addHeadphoneFence();
         addCyclingFence();
         addRunningFence();
         addStationaryFence();
         addWalkingFence();
 
+    }
+    @Override
+    public void onDestroy() {
+      //  unregisterReceiver(mFenceReceiver);
+        super.onDestroy();
     }
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -144,9 +149,9 @@ public class AwarenessService extends Service {
                     @Override
                     public void onResult(@NonNull Status status) {
                         if (status.isSuccess()) {
-                            Log.i(TAG, " Walking Fence was successfully registered.");
+                            Log.i(TAG, " Running Fence was successfully registered.");
                         } else {
-                            Log.e(TAG, " Walking Fence could not be registered: " + status);
+                            Log.e(TAG, " Running Fence could not be registered: " + status);
                         }
                     }
                 });
@@ -168,9 +173,9 @@ public class AwarenessService extends Service {
                     @Override
                     public void onResult(@NonNull Status status) {
                         if (status.isSuccess()) {
-                            Log.i(TAG, " Walking Fence was successfully registered.");
+                            Log.i(TAG, " Cycling Fence was successfully registered.");
                         } else {
-                            Log.e(TAG, " Walking Fence could not be registered: " + status);
+                            Log.e(TAG, " Cycling Fence could not be registered: " + status);
                         }
                     }
                 });
@@ -192,9 +197,9 @@ public class AwarenessService extends Service {
                     @Override
                     public void onResult(@NonNull Status status) {
                         if (status.isSuccess()) {
-                            Log.i(TAG, " Walking Fence was successfully registered.");
+                            Log.i(TAG, " Stationary Fence was successfully registered.");
                         } else {
-                            Log.e(TAG, " Walking Fence could not be registered: " + status);
+                            Log.e(TAG, " Stationary Fence could not be registered: " + status);
                         }
                     }
                 });

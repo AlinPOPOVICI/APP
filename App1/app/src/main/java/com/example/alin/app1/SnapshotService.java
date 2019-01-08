@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -14,6 +15,7 @@ import android.os.Process;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.awareness.Awareness;
 import com.google.android.gms.awareness.snapshot.BeaconStateResult;
@@ -74,6 +76,7 @@ public class SnapshotService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i("LocalService", "Received start id " + startId + ": " + intent);
+        Toast.makeText(this, "Getting data", Toast.LENGTH_LONG).show();
         getSnapshots();
         return START_NOT_STICKY;
     }
@@ -193,9 +196,13 @@ public class SnapshotService extends Service {
                                 return;
                             }
                             Weather weather = weatherResult.getWeather();
-                            data.setWeatherCelsius(weatherResult.getWeather().getTemperature(2));
-                            data.setWeatherCondition(weatherResult.getWeather().getConditions()[0]);
-                        }
+                            if(weather != null) {
+                                data.setWeatherCelsius(weatherResult.getWeather().getTemperature(2));
+                                data.setWeatherCondition(weatherResult.getWeather().getConditions()[0]);
+                            }else{
+                                data.setWeatherCelsius(-13);
+                                data.setWeatherCondition(-13);
+                            }}
                     });
 
             //Beacon

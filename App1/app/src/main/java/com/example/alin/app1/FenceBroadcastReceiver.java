@@ -1,18 +1,36 @@
 package com.example.alin.app1;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
+
 import com.google.android.gms.awareness.fence.FenceState;
 
+import java.util.Calendar;
 
+/*
+        Calendar cal = Calendar.getInstance();
+        Intent intent = new Intent(this, ProximityAlertService.class);
+        PendingIntent pintent = PendingIntent.getService(this, 0, intent, 0);
+        AlarmManager alarm = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        Log.d("Main",String.valueOf( cal.getTimeInMillis()));
+        //make the alarm goes off every 10 sec (not exact help to save battery life)
+        alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), 10000, pintent);
+*/
 
 public class FenceBroadcastReceiver extends BroadcastReceiver {
 
     private static final String TAG = "FenceBroadcastReceiver";
+
+    @Override
+    public void onCreate(){
+
+    }
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -31,6 +49,7 @@ public class FenceBroadcastReceiver extends BroadcastReceiver {
                     Log.i(TAG, "Received a FenceUpdate -  Headphones are NOT plugged in.");
                     Toast.makeText(context, "Your headphones are NOT plugged in",
                             Toast.LENGTH_LONG).show();
+                    start_alarm(context,300);
                     break;
 
                 case FenceState.UNKNOWN:
@@ -119,5 +138,23 @@ public class FenceBroadcastReceiver extends BroadcastReceiver {
             }
         }
 
+
+    }
+    private void start_alarm(Context context, int t){
+        Log.i(TAG, "Start_alarm.");
+        Calendar cal = Calendar.getInstance();
+        Intent schedule_intent = new Intent(context, SnapshotService.class);
+        PendingIntent pintent = PendingIntent.getService(context, 1, schedule_intent, 0);
+        AlarmManager alarm = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), t, pintent);
+       // Toast.makeText(context, "Getting data", Toast.LENGTH_LONG).show();
+
+    }
+    private void stop_alarm(Context context)
+    {
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        Intent myIntent = new Intent(context, SnapshotService.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 1, myIntent,0);
+        alarmManager.cancel(pendingIntent);
     }
 }
