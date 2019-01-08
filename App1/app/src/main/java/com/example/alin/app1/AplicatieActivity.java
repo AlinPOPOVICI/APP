@@ -2,13 +2,16 @@ package com.example.alin.app1;
 
 import android.app.TimePickerDialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
@@ -25,6 +28,8 @@ public class AplicatieActivity extends AppCompatActivity {
     private TimePicker timePicker;
     private Data da;
     private Aplicatie dene;
+    private AplicatieRepository mAplicatieRepository;
+    private TextView mAppNameTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,9 +39,12 @@ public class AplicatieActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         Intent i = getIntent();
-        dene = (Aplicatie) i.getSerializableExtra("sampleObject");
+        dene = (Aplicatie) i.getSerializableExtra("AObject");
         da = new Data();
 
+        mAppNameTextView = (TextView) findViewById(R.id.textViewAppName);
+        mAppNameTextView.setText(dene.getTitle());
+        mAppNameTextView.setTextColor(Color.RED);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -93,5 +101,10 @@ public class AplicatieActivity extends AppCompatActivity {
         mTimePicker.setTitle("Select Time");
         mTimePicker.show();
 
+    }
+    public void save(View view){
+        Toast.makeText(this, "Data Saved", Toast.LENGTH_SHORT).show();
+        //dene.setData(da);
+        //mAplicatieRepository.insert(dene);
     }
 }

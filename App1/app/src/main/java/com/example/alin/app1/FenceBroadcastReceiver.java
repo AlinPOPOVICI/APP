@@ -27,10 +27,10 @@ public class FenceBroadcastReceiver extends BroadcastReceiver {
 
     private static final String TAG = "FenceBroadcastReceiver";
 
-    @Override
-    public void onCreate(){
+    ///@Override
+   // public void onCreate(){
 
-    }
+   // }
 
     @Override
     public void onReceive(Context context, Intent intent) {

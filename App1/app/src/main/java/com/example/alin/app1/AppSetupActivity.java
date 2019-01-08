@@ -49,17 +49,17 @@ public class AppSetupActivity extends AppCompatActivity {
 
             @Override
             public void onLongClick(View view, int position) {
-                Aplicatie movie = movieList.get(position);
-                start_applicatie(view,movie);
+                Aplicatie app = movieList.get(position);
+                start_applicatie(view,app);
             }
         }));
 
         prepareMovieData();
     }
-    public void start_applicatie(View view, Aplicatie movie) {
+    public void start_applicatie(View view, Aplicatie app) {
 
         Intent i = new Intent(this , AplicatieActivity.class);
-        i.putExtra("sampleObject", movie);
+        i.putExtra("AObject", app);
         startActivity(i);
     }
 
