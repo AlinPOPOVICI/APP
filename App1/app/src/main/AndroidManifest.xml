@@ -42,6 +42,24 @@
             android:name="org.apache.http.legacy"
             android:required="false" />
 
+        <activity android:label="@string/app_name"
+            android:name="LoreActivity"
+            android:theme="@android:style/Theme.NoDisplay">
+        </activity>
+
+        <receiver
+            android:label="@string/app_name"
+            android:name="WidgetProvider">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/app_widget_info" />
+        </receiver>
+        <service android:name="WidgetService"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
+
+
         <activity
             android:name=".MapsActivity"
             android:label="@string/title_activity_maps"
@@ -49,11 +67,12 @@
 
         <service android:name=".AwarenessService" />
 
-        <receiver android:name=".FenceBroadcastReceiver"
+        <receiver
+            android:name=".FenceBroadcastReceiver"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
@@ -88,7 +107,8 @@
         <activity
             android:name=".AplicatieActivity"
             android:label="@string/title_activity_aplicatie"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+
     </application>
 
 </manifest>

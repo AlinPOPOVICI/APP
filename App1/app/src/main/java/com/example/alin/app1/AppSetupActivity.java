@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AppSetupActivity extends AppCompatActivity {
-   // final PackageManager pm = getPackageManager();
+   // private final PackageManager pm = getPackageManager();
     private List<Aplicatie> movieList = new ArrayList<>();
     private RecyclerView recyclerView;
     private MyAdapter mAdapter;

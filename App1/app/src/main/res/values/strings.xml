@@ -23,4 +23,6 @@
     <string name="latitude">Latitude</string>
     <string name="title_activity_app_setup">AppSetupActivity</string>
     <string name="title_activity_aplicatie">AplicatieActivity</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
 </resources>
