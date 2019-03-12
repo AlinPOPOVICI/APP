@@ -103,9 +103,9 @@ public class AwarenessService extends Service {
                     @Override
                     public void onResult(@NonNull Status status) {
                         if (status.isSuccess()) {
-                            Log.i(TAG, "Fence was successfully registered.");
+                            Log.i(TAG, "Headphone Fence was successfully registered.");
                         } else {
-                            Log.e(TAG, "Fence could not be registered: " + status);
+                            Log.e(TAG, "Headphone Fence could not be registered: " + status);
                         }
                     }
                 });

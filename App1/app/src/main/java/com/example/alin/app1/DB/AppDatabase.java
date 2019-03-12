@@ -19,8 +19,9 @@ public abstract class AppDatabase extends RoomDatabase {
                         Room.databaseBuilder(context.getApplicationContext(), AppDatabase.class, "data-database")
                                 // allow queries on the main thread.
                                 // Don't do this on a real app! See PersistenceBasicSample for an example.
-                               // .allowMainThreadQueries()
+                                .allowMainThreadQueries()
                                 .fallbackToDestructiveMigration()
+                                //.addCallback(sRoomDatabaseCallback)
                                 .build();
             }
             return INSTANCE;

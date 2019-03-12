@@ -11,6 +11,7 @@ import java.util.List;
 public interface AplicatieDao {
 
     @Query("SELECT * FROM Aplicatie")
+    //LiveData<List<Aplicatie>> getAll();
     List<Aplicatie> getAll();
 
     //@Query("SELECT * FROM Data where first_name LIKE  :firstName AND last_name LIKE :lastName")
@@ -24,4 +25,7 @@ public interface AplicatieDao {
 
     @Delete
     void delete(Aplicatie data);
+
+    @Query("DELETE FROM Aplicatie")
+    void deleteAll();
 }

@@ -7,6 +7,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.example.alin.app1.Activities.LoreActivity;
@@ -48,6 +49,7 @@ public class WidgetProvider extends AppWidgetProvider {
             AppWidgetManager mgr = AppWidgetManager.getInstance(context);
             ComponentName cn = new ComponentName(context, WidgetProvider.class);
             mgr.notifyAppWidgetViewDataChanged(mgr.getAppWidgetIds(cn), R.id.words);
+            Log.i("WIDGET_R_VIEW ","on Receive ");
         }
         super.onReceive(context, intent);
     }
@@ -56,6 +58,7 @@ public class WidgetProvider extends AppWidgetProvider {
         Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
         intent.setComponent(new ComponentName(context, WidgetProvider.class));
         context.sendBroadcast(intent);
+        Log.i("WIDGET_R_VIEW ","Refresh BC ");
     }
 
    /* private RemoteViews updateWidgetListView(Context context, int appWidgetId) {

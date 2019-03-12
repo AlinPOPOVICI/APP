@@ -18,18 +18,8 @@ import java.util.List;
 
 public class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 {
-    /*
-    private static final String[] items={"lorem", "ipsum", "dolor",
-            "sit", "amet", "consectetuer",
-            "adipiscing", "elit", "morbi",
-            "vel", "ligula", "vitae",
-            "arcu", "aliquet", "mollis",
-            "etiam", "vel", "erat",
-            "placerat", "ante",
-            "porttitor", "sodales",
-            "pellentesque", "augue",
-            "purus"};
-*/
+
+   // private AplicatieViewModel mAplicatieViewModel ;
     private AplicatieRepository mAplicatieRepository ;
     private Context ctxt = null;
     private int appWidgetId;
@@ -39,6 +29,7 @@ public class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsF
 
     public WidgetRemoteViewsFactory(Context applicationContext, Intent intent, Application ap) {
         this.ctxt=applicationContext;
+        //mAplicatieViewModel = ViewModelProviders.of(this).get(AplicatieViewModel)
         this.mAplicatieRepository = new AplicatieRepository(ap);
         appWidgetId=intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
 
@@ -56,7 +47,7 @@ public class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsF
             //  }
         }*/
 
-        appList = (List<Aplicatie>) mAplicatieRepository.getAllData();
+        appList =  mAplicatieRepository.getAllData();
         Log.i("WIDGET_R_VIEW ","in widget r factory ");
         if(appList != null ){
 
@@ -138,6 +129,26 @@ public class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsF
 
     @Override
     public void onDataSetChanged() {
+        sList = new ArrayList<>();
+        appList = (List<Aplicatie>) mAplicatieRepository.getAllData();
+        Log.i("WIDGET_R_VIEW ","in widget r2 factory ");
+        if(appList != null ){
+
+            if(appList.size() > 0) {
+                for (int i = 0; i < appList.size(); i++) {
+                    Aplicatie app = appList.get(i);
+                    sList.add(app.getName());
+                }
+            }else{
+                sList.add("NO_DATA");
+            }
+        }else{
+            //  Aplicatie app2 = new Aplicatie();
+            // app2.setName("NO_DATA");
+            sList.add("NULL");
+        }
+        strList = new String[sList.size()];
+        strList = sList.toArray(strList);
         // no-op
     }
 

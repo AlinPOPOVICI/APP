@@ -12,6 +12,8 @@ import com.example.alin.app1.Services.AwarenessService;
 import com.example.alin.app1.Services.SnapshotService;
 import com.google.android.gms.awareness.fence.FenceState;
 
+import java.util.Calendar;
+
 /*
         Calendar cal = Calendar.getInstance();
         Intent intent = new Intent(this, ProximityAlertService.class);
@@ -34,8 +36,14 @@ public class FenceBroadcastReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         FenceState fenceState = FenceState.extract(intent);
         Log.d(TAG, "Received a Fence Broadcast");
+        String action = intent.getAction();
 
-        if (TextUtils.equals(fenceState.getFenceKey(), AwarenessService.HEADPHONE_FENCE_KEY)) {
+        if(SnapshotService.CUSTOM_BROADCAST_ACTION.equals(action)) {
+            Log.i(TAG, "Received a FenceUpdate -  Custom ");
+            start_alarm(context, 40000);
+        }
+
+            if (TextUtils.equals(fenceState.getFenceKey(), AwarenessService.HEADPHONE_FENCE_KEY)) {
             switch (fenceState.getCurrentState()) {
                 case FenceState.TRUE:
                     Log.i(TAG, "Received a FenceUpdate -  Headphones are plugged in.");
@@ -43,7 +51,7 @@ public class FenceBroadcastReceiver extends BroadcastReceiver {
 
                 case FenceState.FALSE:
                     Log.i(TAG, "Received a FenceUpdate -  Headphones are NOT plugged in.");
-                    start_alarm(context,300);
+                    start_alarm(context,60000);
                     break;
 
                 case FenceState.UNKNOWN:
@@ -128,13 +136,13 @@ public class FenceBroadcastReceiver extends BroadcastReceiver {
     }
     private void start_alarm(Context context, int t){
         Log.i(TAG, "Start_alarm.");
-        Intent schedule_intent = new Intent(context, SnapshotService.class);
-        context.startService(schedule_intent);
-        /*Calendar cal = Calendar.getInstance();
+       // Intent schedule_intent = new Intent(context, SnapshotService.class);
+       // context.startService(schedule_intent);
+        Calendar cal = Calendar.getInstance();
         Intent schedule_intent = new Intent(context, SnapshotService.class);
         PendingIntent pintent = PendingIntent.getService(context, 1, schedule_intent, 0);
         AlarmManager alarm = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), t, pintent);*/
+        alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), t, pintent);
        // Toast.makeText(context, "Getting data", Toast.LENGTH_LONG).show();
 
     }

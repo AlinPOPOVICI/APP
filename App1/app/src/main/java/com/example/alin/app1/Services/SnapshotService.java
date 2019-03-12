@@ -1,7 +1,10 @@
 package com.example.alin.app1.Services;
 
 import android.Manifest;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -40,6 +43,7 @@ import java.util.List;
 
 
 public class SnapshotService extends Service {
+    public static final String CUSTOM_BROADCAST_ACTION = "com.example.alin.app1.Servises.BROADCAST_GET_SNAPSHOT";
     private Data data;
     private DataRepository mDataRepository;
 
@@ -79,6 +83,8 @@ public class SnapshotService extends Service {
         Log.i("LocalService", "Received start id " + startId + ": " + intent);
         Toast.makeText(this, "Getting data", Toast.LENGTH_LONG).show();
         getSnapshots();
+        //schedule_snapshot(this.getBaseContext(),60000);
+        send_broadcast();
         return android.app.Service.START_STICKY;
 
     }
@@ -238,6 +244,18 @@ public class SnapshotService extends Service {
                         }
                     });
         }
+
+    }
+    private void send_broadcast() {
+        Intent intent = new Intent(CUSTOM_BROADCAST_ACTION);
+        sendBroadcast(intent);
+    }
+    private void schedule_snapshot(Context context , int t ){
+        Calendar cal = Calendar.getInstance();
+        Intent schedule_intent = new Intent(context, SnapshotService.class);
+        PendingIntent pintent = PendingIntent.getService(context, 1, schedule_intent, 0);
+        AlarmManager alarm = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), t, pintent);
     }
 
     private final class MyServiceHandler extends Handler {
