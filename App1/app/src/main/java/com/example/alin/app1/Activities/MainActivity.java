@@ -1,4 +1,4 @@
-package com.example.alin.app1;
+package com.example.alin.app1.Activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,6 +7,10 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+
+import com.example.alin.app1.Services.AwarenessService;
+import com.example.alin.app1.R;
+import com.example.alin.app1.Services.SnapshotService;
 
 public class MainActivity extends AppCompatActivity {
    // private GoogleApiClient client;

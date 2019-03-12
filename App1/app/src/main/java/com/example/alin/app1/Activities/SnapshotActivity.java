@@ -1,4 +1,4 @@
-package com.example.alin.app1;
+package com.example.alin.app1.Activities;
 
 import android.Manifest;
 import android.arch.lifecycle.ViewModelProviders;
@@ -15,6 +15,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.example.alin.app1.DB.Data;
+import com.example.alin.app1.DB.DataViewModel;
+import com.example.alin.app1.R;
 import com.google.android.gms.awareness.Awareness;
 import com.google.android.gms.awareness.snapshot.BeaconStateResult;
 import com.google.android.gms.awareness.snapshot.DetectedActivityResult;

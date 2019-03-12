@@ -1,9 +1,10 @@
-package com.example.alin.app1;
+package com.example.alin.app1.Activities;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import com.example.alin.app1.Widget.WidgetProvider;
 
 
 public class LoreActivity extends Activity {

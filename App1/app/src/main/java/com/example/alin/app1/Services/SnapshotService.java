@@ -1,10 +1,9 @@
-package com.example.alin.app1;
+package com.example.alin.app1.Services;
 
 import android.Manifest;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.location.Location;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -17,6 +16,8 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.alin.app1.DB.Data;
+import com.example.alin.app1.DB.DataRepository;
 import com.google.android.gms.awareness.Awareness;
 import com.google.android.gms.awareness.snapshot.BeaconStateResult;
 import com.google.android.gms.awareness.snapshot.DetectedActivityResult;
@@ -78,7 +79,8 @@ public class SnapshotService extends Service {
         Log.i("LocalService", "Received start id " + startId + ": " + intent);
         Toast.makeText(this, "Getting data", Toast.LENGTH_LONG).show();
         getSnapshots();
-        return START_NOT_STICKY;
+        return android.app.Service.START_STICKY;
+
     }
 
 

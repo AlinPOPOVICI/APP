@@ -1,19 +1,24 @@
-package com.example.alin.app1;
+package com.example.alin.app1.Widget;
 
+import android.app.Application;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
+
+import com.example.alin.app1.DB.Aplicatie;
+import com.example.alin.app1.DB.AplicatieRepository;
+import com.example.alin.app1.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 {
+    /*
     private static final String[] items={"lorem", "ipsum", "dolor",
             "sit", "amet", "consectetuer",
             "adipiscing", "elit", "morbi",
@@ -24,31 +29,54 @@ public class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsF
             "porttitor", "sodales",
             "pellentesque", "augue",
             "purus"};
-
-    private Context ctxt=null;
+*/
+    private AplicatieRepository mAplicatieRepository ;
+    private Context ctxt = null;
     private int appWidgetId;
     private String[] strList;
     private List<String> sList = new ArrayList<String>();
+    private List<Aplicatie> appList;
 
-    public WidgetRemoteViewsFactory(Context applicationContext, Intent intent) {
+    public WidgetRemoteViewsFactory(Context applicationContext, Intent intent, Application ap) {
         this.ctxt=applicationContext;
+        this.mAplicatieRepository = new AplicatieRepository(ap);
         appWidgetId=intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
 
-        List<PackageInfo> packList = applicationContext.getPackageManager().getInstalledPackages(0);
+        /*List<PackageInfo> packList = applicationContext.getPackageManager().getInstalledPackages(0);
         for (int i=0; i < packList.size(); i++)
         {
             PackageInfo packInfo = packList.get(i);
             // if (  (packInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0)
             //  {
             String appName = packInfo.applicationInfo.loadLabel(applicationContext.getPackageManager()).toString();
-            Log.e("App № " + Integer.toString(i), appName);
-            Aplicatie app = new Aplicatie(appName);
-            sList.add(app.getTitle());
+            Log.i("WIDGET_R_VIEW " + Integer.toString(i), appName);
+           // Aplicatie app = new Aplicatie();
+           // app.setName(appName);
+            sList.add(appName);
             //  }
+        }*/
+
+        appList = (List<Aplicatie>) mAplicatieRepository.getAllData();
+        Log.i("WIDGET_R_VIEW ","in widget r factory ");
+        if(appList != null ){
+
+            if(appList.size() > 0) {
+                for (int i = 0; i < appList.size(); i++) {
+                    Aplicatie app = appList.get(i);
+                    sList.add(app.getName());
+                }
+            }else{
+                sList.add("NO_DATA");
+            }
+        }else{
+              //  Aplicatie app2 = new Aplicatie();
+               // app2.setName("NO_DATA");
+                sList.add("NULL");
         }
         strList = new String[sList.size()];
         strList = sList.toArray(strList);
-    }
+
+        }
 
 
 

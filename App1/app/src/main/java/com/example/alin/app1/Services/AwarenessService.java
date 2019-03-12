@@ -1,9 +1,8 @@
-package com.example.alin.app1;
+package com.example.alin.app1.Services;
 
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -14,6 +13,7 @@ import android.util.Log;
 import android.os.Process;
 import android.widget.Toast;
 
+import com.example.alin.app1.FenceBroadcastReceiver;
 import com.google.android.gms.awareness.Awareness;
 import com.google.android.gms.awareness.fence.AwarenessFence;
 import com.google.android.gms.awareness.fence.DetectedActivityFence;
@@ -25,7 +25,7 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 
 public class AwarenessService extends Service {
-    private static final String TAG = "FenceAwarenessService";
+    private static final String TAG = "Fence_AwarenessService";
     private Looper looper;
     private MyServiceHandler myServiceHandler;
 
@@ -83,7 +83,8 @@ public class AwarenessService extends Service {
         myServiceHandler.sendMessage(msg);
         Toast.makeText(this, "MyService Started.", Toast.LENGTH_SHORT).show();
         //If service is killed while starting, it restarts.
-        return START_STICKY;
+        return android.app.Service.START_STICKY;
+
     }
 
 

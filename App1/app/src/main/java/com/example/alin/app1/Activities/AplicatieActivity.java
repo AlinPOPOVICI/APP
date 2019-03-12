@@ -1,4 +1,4 @@
-package com.example.alin.app1;
+package com.example.alin.app1.Activities;
 
 import android.app.TimePickerDialog;
 import android.content.Intent;
@@ -13,6 +13,12 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.example.alin.app1.DB.Aplicatie;
+import com.example.alin.app1.DB.AplicatieRepository;
+import com.example.alin.app1.DB.Data;
+import com.example.alin.app1.DB.DataRepository;
+import com.example.alin.app1.R;
+import com.example.alin.app1.Widget.WidgetProvider;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
 
@@ -28,7 +34,8 @@ public class AplicatieActivity extends AppCompatActivity {
     private TimePicker timePicker;
     private Data da;
     private Aplicatie dene;
-    private AplicatieRepository mAplicatieRepository;
+    private AplicatieRepository mAplicatieRepository = new AplicatieRepository(this.getApplication());
+    private DataRepository mDataRepository;
     private TextView mAppNameTextView;
 
     @Override
@@ -39,11 +46,13 @@ public class AplicatieActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         Intent i = getIntent();
-        dene = (Aplicatie) i.getSerializableExtra("AObject");
+        //get app name not Aplicatie obj.
+        dene = new Aplicatie();
+        dene.setName((String) i.getSerializableExtra("AObject"));
         da = new Data();
 
         mAppNameTextView = (TextView) findViewById(R.id.textViewAppName);
-        mAppNameTextView.setText(dene.getTitle());
+        mAppNameTextView.setText(dene.getName());
         mAppNameTextView.setTextColor(Color.RED);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -95,7 +104,8 @@ public class AplicatieActivity extends AppCompatActivity {
                 Date t = new Date();
                 t.setHours(selectedHour);
                 t.setMinutes(selectedMinute);
-                da.setTime(t);
+                 da.setTime(t);
+                 dene.setTime(t);
             }
         }, hour, minute, true);//Yes 24 hour time
         mTimePicker.setTitle("Select Time");
@@ -104,7 +114,11 @@ public class AplicatieActivity extends AppCompatActivity {
     }
     public void save(View view){
         Toast.makeText(this, "Data Saved", Toast.LENGTH_SHORT).show();
-        //dene.setData(da);
-        //mAplicatieRepository.insert(dene);
+        mAplicatieRepository.insert(dene);
+        WidgetProvider.sendRefreshBroadcast(getApplicationContext());
+        //mDataRepository.insert(dene);
     }
 }
+
+
+

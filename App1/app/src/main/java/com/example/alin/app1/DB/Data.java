@@ -1,9 +1,11 @@
-package com.example.alin.app1;
+package com.example.alin.app1.DB;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 import android.arch.persistence.room.TypeConverters;
+
+import com.example.alin.app1.DateConverter;
 
 import java.util.Date;
 

@@ -1,4 +1,4 @@
-package com.example.alin.app1;
+package com.example.alin.app1.DB;
 
 import android.app.Application;
 import android.arch.lifecycle.LiveData;
@@ -6,23 +6,23 @@ import android.os.AsyncTask;
 
 import java.util.List;
 
-class AplicatieRepository {
+public class AplicatieRepository {
 
         private AplicatieDao myADao;
         private LiveData<List<Aplicatie>> mAllData;
 
-        AplicatieRepository(Application application) {
+        public AplicatieRepository(Application application) {
 
             AppDatabase db = AppDatabase.getAppDatabase(application);
-            myADao = (AplicatieDao) db.dataDao();
+            myADao =  db.aplicatieDao();
         }
 
 
-        LiveData<List<Aplicatie>> getAllData() {
+        public LiveData<List<Aplicatie>> getAllData() {
             return mAllData;
         }
 
-        void insert(Aplicatie app) {
+        public void insert(Aplicatie app) {
             new insertAsyncTask(myADao).execute(app);
         }
 

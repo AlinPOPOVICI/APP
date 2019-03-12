@@ -1,10 +1,11 @@
-package com.example.alin.app1;
+package com.example.alin.app1.DB;
 
 
 
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
+
 import java.util.List;
 
 
@@ -21,11 +22,11 @@ public class DataViewModel extends AndroidViewModel{
 
     }
 
-    LiveData<List<Data>> getAllData() {
+    public LiveData<List<Data>> getAllData() {
         return mAllWords;
     }
 
-    void insert(Data data) {
+    public void insert(Data data) {
         mRepository.insert(data);
 
     }

@@ -1,4 +1,4 @@
-package com.example.alin.app1;
+package com.example.alin.app1.DB;
 
 
 import android.support.v7.widget.RecyclerView;
@@ -6,6 +6,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.example.alin.app1.R;
 
 import java.util.List;
 
@@ -35,8 +37,8 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
-        Aplicatie movie = moviesList.get(position);
-        holder.title.setText(movie.getTitle());
+        Aplicatie app = moviesList.get(position);
+        holder.title.setText(app.getName());
 
     }
 

@@ -1,13 +1,13 @@
-package com.example.alin.app1;
+package com.example.alin.app1.Activities;
 
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.graphics.Color;
-import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 
+import com.example.alin.app1.DB.Data;
+import com.example.alin.app1.DB.DataViewModel;
+import com.example.alin.app1.R;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -69,7 +69,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // Add a marker in Sydney and move the camera
         LatLng sydney = new LatLng(37.422, -122.084);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker "));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
         //mDataViewModel.getAllData();
         circle = mMap.addCircle(new CircleOptions()

@@ -1,4 +1,4 @@
-package com.example.alin.app1;
+package com.example.alin.app1.Activities;
 
 
 import android.content.Intent;
@@ -14,12 +14,17 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.alin.app1.DB.Aplicatie;
+import com.example.alin.app1.DB.MyAdapter;
+import com.example.alin.app1.R;
+import com.example.alin.app1.RecyclerTouchListener;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class AppSetupActivity extends AppCompatActivity {
    // private final PackageManager pm = getPackageManager();
-    private List<Aplicatie> movieList = new ArrayList<>();
+    private List<Aplicatie> appList = new ArrayList<>();
     private RecyclerView recyclerView;
     private MyAdapter mAdapter;
 
@@ -32,7 +37,7 @@ public class AppSetupActivity extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.recycler_view);
 
-        mAdapter = new MyAdapter(movieList);
+        mAdapter = new MyAdapter(appList);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -41,15 +46,15 @@ public class AppSetupActivity extends AppCompatActivity {
         recyclerView.addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), recyclerView, new RecyclerTouchListener.ClickListener() {
             @Override
             public void onClick(View view, int position) {
-                Aplicatie movie = movieList.get(position);
-                Toast.makeText(getApplicationContext(), movie.getTitle() + " is selected!", Toast.LENGTH_SHORT).show();
+                Aplicatie selected_app = appList.get(position);
+                Toast.makeText(getApplicationContext(), selected_app.getName() + " is selected!", Toast.LENGTH_SHORT).show();
 
 
             }
 
             @Override
             public void onLongClick(View view, int position) {
-                Aplicatie app = movieList.get(position);
+                Aplicatie app = appList.get(position);
                 start_applicatie(view,app);
             }
         }));
@@ -59,7 +64,8 @@ public class AppSetupActivity extends AppCompatActivity {
     public void start_applicatie(View view, Aplicatie app) {
 
         Intent i = new Intent(this , AplicatieActivity.class);
-        i.putExtra("AObject", app);
+      //  i.putExtra("AObject", app);
+        i.putExtra("AObject", app.getName());
         startActivity(i);
     }
 
@@ -72,61 +78,13 @@ public class AppSetupActivity extends AppCompatActivity {
            // if (  (packInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0)
           //  {
                 String appName = packInfo.applicationInfo.loadLabel(getPackageManager()).toString();
-                Log.e("App № " + Integer.toString(i), appName);
-                Aplicatie app = new Aplicatie(appName);
-                movieList.add(app);
+                Log.i("APP_SETUP " + Integer.toString(i), appName);
+                Aplicatie app = new Aplicatie();
+                app.setName(appName);
+                appList.add(app);
           //  }
         }
 
-        /*
-        Movie movie = new Movie("Mad Max: Fury Road", "Action & Adventure", "2015");
-        movieList.add(movie);
-
-        movie = new Movie("Inside Out", "Animation, Kids & Family", "2015");
-        movieList.add(movie);
-
-        movie = new Movie("Star Wars: Episode VII - The Force Awakens", "Action", "2015");
-        movieList.add(movie);
-
-        movie = new Movie("Shaun the Sheep", "Animation", "2015");
-        movieList.add(movie);
-
-        movie = new Movie("The Martian", "Science Fiction & Fantasy", "2015");
-        movieList.add(movie);
-
-        movie = new Movie("Mission: Impossible Rogue Nation", "Action", "2015");
-        movieList.add(movie);
-
-        movie = new Movie("Up", "Animation", "2009");
-        movieList.add(movie);
-
-        movie = new Movie("Star Trek", "Science Fiction", "2009");
-        movieList.add(movie);
-
-        movie = new Movie("The LEGO Movie", "Animation", "2014");
-        movieList.add(movie);
-
-        movie = new Movie("Iron Man", "Action & Adventure", "2008");
-        movieList.add(movie);
-
-        movie = new Movie("Aliens", "Science Fiction", "1986");
-        movieList.add(movie);
-
-        movie = new Movie("Chicken Run", "Animation", "2000");
-        movieList.add(movie);
-
-        movie = new Movie("Back to the Future", "Science Fiction", "1985");
-        movieList.add(movie);
-
-        movie = new Movie("Raiders of the Lost Ark", "Action & Adventure", "1981");
-        movieList.add(movie);
-
-        movie = new Movie("Goldfinger", "Action & Adventure", "1965");
-        movieList.add(movie);
-
-        movie = new Movie("Guardians of the Galaxy", "Science Fiction & Fantasy", "2014");
-        movieList.add(movie);
-    */
         mAdapter.notifyDataSetChanged();
     }
 }

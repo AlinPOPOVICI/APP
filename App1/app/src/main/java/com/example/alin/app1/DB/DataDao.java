@@ -1,4 +1,4 @@
-package com.example.alin.app1;
+package com.example.alin.app1.DB;
 
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
@@ -8,20 +8,20 @@ import android.arch.persistence.room.Query;
 import java.util.List;
 
 @Dao
-public interface AplicatieDao {
+public interface DataDao {
 
-    @Query("SELECT * FROM Aplicatie")
+    @Query("SELECT * FROM Data")
     List<Data> getAll();
 
     //@Query("SELECT * FROM Data where first_name LIKE  :firstName AND last_name LIKE :lastName")
-    // Data findByName(String firstName, String lastName);
+   // Data findByName(String firstName, String lastName);
 
-    // @Query("SELECT COUNT(*) from user")
-    // int countUsers();
+   // @Query("SELECT COUNT(*) from user")
+   // int countUsers();
 
     @Insert
-    void insert(Aplicatie... data);
+    void insert(Data... data);
 
     @Delete
-    void delete(Aplicatie data);
+    void delete(Data data);
 }
