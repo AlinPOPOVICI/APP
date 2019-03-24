@@ -130,6 +130,7 @@ public class SnapshotService extends Service {
         data.setTime(calendar.getTime());
         getFineLocationSnapshots();
         mDataRepository.insert(data);
+        updateAppList();
 
     }
 
@@ -246,6 +247,11 @@ public class SnapshotService extends Service {
         }
 
     }
+    private void updateAppList() {
+        Intent schedule_intent = new Intent(getApplicationContext(), SuggestionListService.class);
+        getApplicationContext().startService(schedule_intent);
+    }
+
     private void send_broadcast() {
         Intent intent = new Intent(CUSTOM_BROADCAST_ACTION);
         sendBroadcast(intent);

@@ -48,6 +48,7 @@ public class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsF
         }*/
 
         appList =  mAplicatieRepository.getAllData();
+        //appList =  mAplicatieRepository.getSortedData();
         Log.i("WIDGET_R_VIEW ","in widget r factory ");
         if(appList != null ){
 

@@ -9,16 +9,18 @@ import com.example.alin.app1.DateConverter;
 
 import java.util.Date;
 
-@Entity(tableName = "Data")
-public class Data {
-
+@Entity(tableName = "AplicatieData")
+public class AplicatieData {
 
     @PrimaryKey(autoGenerate = true)
     public int id;
 
-
     @TypeConverters(DateConverter.class)
     private Date time;
+
+    @ColumnInfo(name = "app_name")
+    private String name;
+
 
     @ColumnInfo (name = "headphone_state")
     private int headphoneState;
@@ -95,5 +97,16 @@ public class Data {
         this.locationLongitude = locationLongitude;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String title) {
+        this.name = title;
+    }
+
+
+
 
 }
+

@@ -11,26 +11,37 @@ public class AplicatieRepository {
 
      private AplicatieDao myADao;
      //private LiveData<List<Aplicatie>> mAllData ;
-    private List<Aplicatie>mAllData ;
+    //private List<Aplicatie>mAllData ;
 
      public AplicatieRepository(Application application) {
             AppDatabase db = AppDatabase.getAppDatabase(application);
             myADao =  db.aplicatieDao();
-            mAllData = myADao.getAll();
 
      }
 
 
         //public LiveData<List<Aplicatie>> getAllData() {
-            public List<Aplicatie> getAllData() {
-            Log.i(TAG,"getALL ");
-            return mAllData;
-        }
+    public List<Aplicatie> getAllData() {
+        Log.i(TAG,"getALL ");
+        return myADao.getAll();
+    }
+    public List<Aplicatie> getSortedData() {
+        Log.i(TAG,"getALL ");
+        return myADao.sortedFind();
+    }
 
         public void insert(Aplicatie app) {
             Log.i(TAG,"insert");
             new insertAsyncTask(myADao).execute(app);
         }
+    public void deleteAll() {
+        Log.i(TAG,"deleteAll");
+        myADao.deleteAll();
+    }
+    public void delete(Aplicatie data) {
+            Log.i(TAG,"delete");
+        myADao.delete(data);
+    }
 
 
 

@@ -9,7 +9,7 @@
          location permissions for the 'MyLocation' functionality. 
     -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
 
     <application
@@ -20,7 +20,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-
+        <service
+            android:name=".Services.SuggestionListService"
+            android:enabled="true"
+            android:exported="true"></service>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -43,23 +46,26 @@
             android:name="org.apache.http.legacy"
             android:required="false" />
 
-        <activity android:label="@string/app_name"
+        <activity
             android:name=".Activities.LoreActivity"
-            android:theme="@android:style/Theme.NoDisplay">
-        </activity>
+            android:label="@string/app_name"
+            android:theme="@android:style/Theme.NoDisplay"></activity>
 
         <receiver
-            android:label="@string/app_name"
-            android:name=".Widget.WidgetProvider">
+            android:name=".Widget.WidgetProvider"
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
-            <meta-data android:name="android.appwidget.provider"
+
+            <meta-data
+                android:name="android.appwidget.provider"
                 android:resource="@xml/app_widget_info" />
         </receiver>
-        <service android:name=".Services.WidgetService"
-            android:permission="android.permission.BIND_REMOTEVIEWS" />
 
+        <service
+            android:name=".Services.WidgetService"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
 
         <activity
             android:name=".Activities.MapsActivity"
@@ -110,7 +116,6 @@
             android:name=".Activities.AplicatieActivity"
             android:label="@string/title_activity_aplicatie"
             android:theme="@style/AppTheme.NoActionBar" />
-
     </application>
 
 </manifest>

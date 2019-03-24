@@ -13,14 +13,15 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.example.alin.app1.DB.Aplicatie;
-import com.example.alin.app1.DB.AplicatieRepository;
+import com.example.alin.app1.DB.AplicatieData;
+import com.example.alin.app1.DB.AplicatieDataRepository;
 import com.example.alin.app1.DB.Data;
 import com.example.alin.app1.DB.DataRepository;
 import com.example.alin.app1.R;
 import com.example.alin.app1.Widget.WidgetProvider;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -33,8 +34,8 @@ public class AplicatieActivity extends AppCompatActivity {
     private PlacePicker.IntentBuilder builder;
     private TimePicker timePicker;
     private Data da;
-    private Aplicatie dene;
-    private AplicatieRepository mAplicatieRepository = new AplicatieRepository(this.getApplication());
+    private AplicatieData dene;
+    private AplicatieDataRepository mAplicatieRepository = new AplicatieDataRepository(this.getApplication());
     private DataRepository mDataRepository;
     private TextView mAppNameTextView;
 
@@ -47,7 +48,7 @@ public class AplicatieActivity extends AppCompatActivity {
 
         Intent i = getIntent();
         //get app name not Aplicatie obj.
-        dene = new Aplicatie();
+        dene = new AplicatieData();
         dene.setName((String) i.getSerializableExtra("AObject"));
         da = new Data();
 
@@ -71,12 +72,12 @@ public class AplicatieActivity extends AppCompatActivity {
         if (requestCode == PLACE_PICKER_REQUEST) {
             if (resultCode == RESULT_OK) {
                 Place place = PlacePicker.getPlace(data, this);
-                //LatLng latlng = place.getLatLng();
-                // Double latitude = place.getLatLng().latitude;
-                // Double longitude = place.getLatLng().longitude;
-                //  da.setLocationLatitude(latitude);
-                // da.setLocationLongitude(longitude);
-                // dene.setData(da);
+                LatLng latlng = place.getLatLng();
+                Double latitude = place.getLatLng().latitude;
+                Double longitude = place.getLatLng().longitude;
+                dene.setLocationLatitude(latitude);
+                dene.setLocationLongitude(longitude);
+
             }
         }
     }
@@ -104,7 +105,7 @@ public class AplicatieActivity extends AppCompatActivity {
                 Date t = new Date();
                 t.setHours(selectedHour);
                 t.setMinutes(selectedMinute);
-                 da.setTime(t);
+                 //da.setTime(t);
                  dene.setTime(t);
             }
         }, hour, minute, true);//Yes 24 hour time

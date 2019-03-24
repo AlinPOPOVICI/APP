@@ -3,11 +3,6 @@ package com.example.alin.app1.DB;
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
-import android.arch.persistence.room.TypeConverters;
-
-import com.example.alin.app1.DateConverter;
-
-import java.util.Date;
 
 @Entity(tableName = "Aplicatie")
 public class Aplicatie{
@@ -15,8 +10,8 @@ public class Aplicatie{
     @PrimaryKey(autoGenerate = true)
     public int id;
 
-    @TypeConverters(DateConverter.class)
-    private Date time;
+    @ColumnInfo(name = "prioritate")
+    private int prioritate;
 
     @ColumnInfo(name = "app_name")
     private String name;
@@ -30,13 +25,12 @@ public class Aplicatie{
         this.name = title;
     }
 
-    public Date getTime() {
-        return time;
+
+    public int getPrioritate() {
+        return prioritate;
     }
 
-    public void setTime(Date time) {
-        this.time = time;
+    public void setPrioritate(int prioritate) {
+        this.prioritate = prioritate;
     }
-
-
 }
