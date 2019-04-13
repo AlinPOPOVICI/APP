@@ -24,4 +24,7 @@ public interface DataDao {
 
     @Delete
     void delete(Data data);
+
+    @Query("DELETE FROM Data")
+    void deleteAll();
 }

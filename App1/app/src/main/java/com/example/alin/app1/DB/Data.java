@@ -4,13 +4,15 @@ import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 import android.arch.persistence.room.TypeConverters;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import com.example.alin.app1.DateConverter;
 
 import java.util.Date;
 
 @Entity(tableName = "Data")
-public class Data {
+public class Data implements Parcelable {
 
 
     @PrimaryKey(autoGenerate = true)
@@ -37,6 +39,31 @@ public class Data {
 
     @ColumnInfo (name = "location_longitude")
     private double locationLongitude;
+
+    public Data(){
+
+    }
+    protected Data(Parcel in) {
+        id = in.readInt();
+        headphoneState = in.readInt();
+        weatherCondition = in.readInt();
+        weatherCelsius = in.readFloat();
+        activity = in.readInt();
+        locationLatitude = in.readDouble();
+        locationLongitude = in.readDouble();
+    }
+
+    public static final Creator<Data> CREATOR = new Creator<Data>() {
+        @Override
+        public Data createFromParcel(Parcel in) {
+            return new Data(in);
+        }
+
+        @Override
+        public Data[] newArray(int size) {
+            return new Data[size];
+        }
+    };
 
     public Date getTime() {
         return time;
@@ -96,4 +123,19 @@ public class Data {
     }
 
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
+        dest.writeInt(headphoneState);
+        dest.writeInt(weatherCondition);
+        dest.writeFloat(weatherCelsius);
+        dest.writeInt(activity);
+        dest.writeDouble(locationLatitude);
+        dest.writeDouble(locationLongitude);
+    }
 }

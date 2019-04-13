@@ -4,7 +4,6 @@ package com.example.alin.app1.DB;
 
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
-import android.arch.lifecycle.LiveData;
 
 import java.util.List;
 
@@ -12,7 +11,7 @@ import java.util.List;
 public class DataViewModel extends AndroidViewModel{
 
     private DataRepository mRepository;
-    private LiveData<List<Data>> mAllWords;
+    private List<Data> mAllWords;
 
 
     public DataViewModel(Application application) {
@@ -22,7 +21,7 @@ public class DataViewModel extends AndroidViewModel{
 
     }
 
-    public LiveData<List<Data>> getAllData() {
+    public List<Data> getAllData() {
         return mAllWords;
     }
 

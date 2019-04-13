@@ -1,13 +1,17 @@
 package com.example.alin.app1.Services;
 
 import android.Manifest;
+import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.app.usage.UsageStats;
+import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -40,10 +44,12 @@ import com.google.android.gms.location.places.PlaceLikelihood;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 
 public class SnapshotService extends Service {
-    public static final String CUSTOM_BROADCAST_ACTION = "com.example.alin.app1.Servises.BROADCAST_GET_SNAPSHOT";
+    public static final String CUSTOM_BROADCAST_ACTION = "com.example.alin.app1.Servises.SnapshotService.CUSTOM_BROADCAST_ACTION";
     private Data data;
     private DataRepository mDataRepository;
 
@@ -78,6 +84,7 @@ public class SnapshotService extends Service {
 
     }
 
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i("LocalService", "Received start id " + startId + ": " + intent);
@@ -94,6 +101,7 @@ public class SnapshotService extends Service {
     public void getSnapshots() {
         // User Activity
         data = new Data();
+        String appName ="";
         Awareness.SnapshotApi.getDetectedActivity(mGoogleApiClient)
                 .setResultCallback(new ResultCallback<DetectedActivityResult>() {
                     @Override
@@ -130,7 +138,8 @@ public class SnapshotService extends Service {
         data.setTime(calendar.getTime());
         getFineLocationSnapshots();
         mDataRepository.insert(data);
-        updateAppList();
+        updateAppList(data);
+        appName = getTopAppName(getApplicationContext());
 
     }
 
@@ -247,14 +256,16 @@ public class SnapshotService extends Service {
         }
 
     }
-    private void updateAppList() {
+    private void updateAppList(Data data) {
         Intent schedule_intent = new Intent(getApplicationContext(), SuggestionListService.class);
+        schedule_intent.putExtra("data", data);
         getApplicationContext().startService(schedule_intent);
     }
 
     private void send_broadcast() {
+        Log.i(TAG, "Snapshot Broadcast");
         Intent intent = new Intent(CUSTOM_BROADCAST_ACTION);
-        sendBroadcast(intent);
+        sendBroadcast(intent, "com.example.alin.app1.FenceBroadcastReceiver");
     }
     private void schedule_snapshot(Context context , int t ){
         Calendar cal = Calendar.getInstance();
@@ -288,6 +299,49 @@ public class SnapshotService extends Service {
             stopSelfResult(msg.arg1);
         }
     }
+
+    public static String getTopAppName(Context context) {
+        ActivityManager mActivityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        String strName = "";
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                String currentApp = null;
+                UsageStatsManager usm = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
+                long time_end= System.currentTimeMillis();
+                long time_begin = time_end - 1000*1000;
+                List<UsageStats> applist = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, time_begin, time_end);
+                if (applist == null) {
+                    Log.i(TAG, "Current App list is NULL ");
+                }
+                if (applist.size() == 0) {
+                    Log.i(TAG, "Current App list is 0 ");
+                }
+
+                if (applist != null && applist.size() > 0) {
+                    Log.i(TAG, "Current App list is not NULL ");
+                    SortedMap<Long, UsageStats> mySortedMap = new TreeMap<>();
+                    for (UsageStats usageStats : applist) {
+                        mySortedMap.put(usageStats.getLastTimeUsed(), usageStats);
+                    }
+                    if (mySortedMap != null && !mySortedMap.isEmpty()) {
+                        currentApp = mySortedMap.get(mySortedMap.lastKey()).getPackageName();
+                    }
+                }
+                Log.i(TAG, "Current App in foreground is: " + currentApp);
+
+                return currentApp;
+
+            //Log.i(TAG, "Got top app name through LOLIPOP: " + strName);
+            } else {
+                strName = mActivityManager.getRunningTasks(1).get(0).topActivity.getClassName();
+                Log.i(TAG, "Got top app name : " + strName);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return strName;
+    }
+
 
 }
 

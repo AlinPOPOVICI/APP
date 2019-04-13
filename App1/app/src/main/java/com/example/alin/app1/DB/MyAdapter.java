@@ -15,7 +15,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     private List<Aplicatie> moviesList;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        public TextView title, year, genre;
+        public TextView title;
 
         public MyViewHolder(View view) {
             super(view);

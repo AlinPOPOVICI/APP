@@ -38,11 +38,13 @@ public class SuggestionListService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Data data;
+        Data data = (Data) intent.getParcelableExtra("data");
         //get latest db entry
 
-        updateAppList(null);
-       // updateAppList(data);
+        if(data != null) {
+            updateAppList(data);
+        }
+        // updateAppList(data);
         return android.app.Service.START_STICKY;
     }
 
@@ -51,7 +53,7 @@ public class SuggestionListService extends Service {
         appDataList =  mAplicatieDataRepository.getAllData();
 
         Log.i("SUGGESTION ","updateLIST ");
-        if(appDataList != null ){
+            if(appDataList != null ){
 
             if(appDataList.size() > 0) {
                 for (int i = 0; i < appDataList.size(); i++) {
@@ -77,6 +79,7 @@ public class SuggestionListService extends Service {
 
     public int evaluate(Data data1, AplicatieData appdata2){
         int value= 0;
+        Log.i("SUGGESTION ","evaluate ");
 
        /* if((data1.getActivity() != null ) && (appdata2.getActivity() != null)) {
             if (data1.getActivity() == appdata2.getActivity()) {

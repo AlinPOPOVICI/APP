@@ -28,18 +28,25 @@ public class FenceBroadcastReceiver extends BroadcastReceiver {
 
     private static final String TAG = "FenceBroadcastReceiver";
 
-    //@Override
-   // public void onCreate(){
-  // }
-
     @Override
     public void onReceive(Context context, Intent intent) {
         FenceState fenceState = FenceState.extract(intent);
         Log.d(TAG, "Received a Fence Broadcast");
         String action = intent.getAction();
+      // if (true){//Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+     //       Intent intent1 = new Intent(context.getApplicationContext(), DummyService.class);
+     //       context.startForegroundService(intent1);
+      //  }
+
+        if(Intent.ACTION_BOOT_COMPLETED.equals(action))
+        {
+            Log.i(TAG, "Received a FenceUpdate -  Boot ");
+            start_alarm(context, 40000);
+        }
 
         if(SnapshotService.CUSTOM_BROADCAST_ACTION.equals(action)) {
             Log.i(TAG, "Received a FenceUpdate -  Custom ");
+            stop_alarm(context);
             start_alarm(context, 40000);
         }
 
@@ -148,6 +155,7 @@ public class FenceBroadcastReceiver extends BroadcastReceiver {
     }
     private void stop_alarm(Context context)
     {
+        Log.i(TAG, "Stop_alarm.");
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent myIntent = new Intent(context, SnapshotService.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 1, myIntent,0);

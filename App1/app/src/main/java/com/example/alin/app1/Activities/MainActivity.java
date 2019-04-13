@@ -8,12 +8,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
-import com.example.alin.app1.Services.AwarenessService;
+import com.example.alin.app1.DB.DataRepository;
 import com.example.alin.app1.R;
+import com.example.alin.app1.Services.AwarenessService;
 import com.example.alin.app1.Services.SnapshotService;
 
 public class MainActivity extends AppCompatActivity {
    // private GoogleApiClient client;
+   private DataRepository mDataRepository ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
                 .addApi(Awareness.API)
                 .build();
         client.connect();*/
+        this.mDataRepository = new DataRepository(this.getApplication());
 
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -45,6 +48,10 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, MapsActivity.class);
         startActivity(intent);
     }
+    public void start_View_data(View view) {
+        Intent intent = new Intent(this, ViewDataActivity.class);
+        startActivity(intent);
+    }
 
     public void start_AppSetup(View view) {
         Intent intent = new Intent(this, AppSetupActivity.class);
@@ -54,6 +61,10 @@ public class MainActivity extends AppCompatActivity {
     public void start_Snapshot(View view) {
         Intent intent = new Intent(this, SnapshotActivity.class);
         startActivity(intent);
+    }
+
+    public void delete_Data(View view) {
+       mDataRepository.deleteAll();
     }
 
 }
