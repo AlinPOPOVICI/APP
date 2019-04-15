@@ -5,9 +5,11 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.example.alin.app1.Job.JobSC;
 import com.example.alin.app1.Services.AwarenessService;
 import com.example.alin.app1.Services.SnapshotService;
 import com.google.android.gms.awareness.fence.FenceState;
@@ -33,21 +35,24 @@ public class FenceBroadcastReceiver extends BroadcastReceiver {
         FenceState fenceState = FenceState.extract(intent);
         Log.d(TAG, "Received a Fence Broadcast");
         String action = intent.getAction();
-      // if (true){//Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-     //       Intent intent1 = new Intent(context.getApplicationContext(), DummyService.class);
-     //       context.startForegroundService(intent1);
-      //  }
+
 
         if(Intent.ACTION_BOOT_COMPLETED.equals(action))
         {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                JobSC.scheduleJob(context);
+            }
             Log.i(TAG, "Received a FenceUpdate -  Boot ");
-            start_alarm(context, 40000);
+           // start_alarm(context, 40000);
         }
 
         if(SnapshotService.CUSTOM_BROADCAST_ACTION.equals(action)) {
             Log.i(TAG, "Received a FenceUpdate -  Custom ");
-            stop_alarm(context);
-            start_alarm(context, 40000);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                JobSC.scheduleJob(context);
+            }
+           // stop_alarm(context);
+           // start_alarm(context, 40000);
         }
 
             if (TextUtils.equals(fenceState.getFenceKey(), AwarenessService.HEADPHONE_FENCE_KEY)) {
@@ -58,7 +63,6 @@ public class FenceBroadcastReceiver extends BroadcastReceiver {
 
                 case FenceState.FALSE:
                     Log.i(TAG, "Received a FenceUpdate -  Headphones are NOT plugged in.");
-                    start_alarm(context,60000);
                     break;
 
                 case FenceState.UNKNOWN:

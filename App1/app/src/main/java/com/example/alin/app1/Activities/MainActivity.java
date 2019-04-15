@@ -1,6 +1,7 @@
 package com.example.alin.app1.Activities;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -9,12 +10,14 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 import com.example.alin.app1.DB.DataRepository;
+import com.example.alin.app1.Job.JobSC;
 import com.example.alin.app1.R;
 import com.example.alin.app1.Services.AwarenessService;
-import com.example.alin.app1.Services.SnapshotService;
 
 public class MainActivity extends AppCompatActivity {
-   // private GoogleApiClient client;
+    private static final String TAG = "Main";
+    private static final String CUSTOM_BROADCAST_ACTION = "CUSTOM_BROADCAST_ACTION";
+    // private GoogleApiClient client;
    private DataRepository mDataRepository ;
 
     @Override
@@ -24,6 +27,8 @@ public class MainActivity extends AppCompatActivity {
                 .addApi(Awareness.API)
                 .build();
         client.connect();*/
+
+
         this.mDataRepository = new DataRepository(this.getApplication());
 
         setContentView(R.layout.activity_main);
@@ -40,8 +45,15 @@ public class MainActivity extends AppCompatActivity {
         });
         Intent intent = new Intent(MainActivity.this, AwarenessService.class);
         startService(intent);
-        Intent inten = new Intent(MainActivity.this, SnapshotService.class);
-        startService(inten);
+        send_broadcast();
+
+       // Intent inten = new Intent(MainActivity.this, SnapshotService.class);
+      //  startService(inten);
+    }
+    private void send_broadcast() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            JobSC.scheduleJob(this.getApplicationContext());
+        }
     }
 
     public void start_Maps(View view) {
