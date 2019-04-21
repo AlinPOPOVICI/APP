@@ -7,12 +7,14 @@ import android.content.Context;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 
+import com.example.alin.app1.Services.SnapshotService;
+
 public class JobSC {
 
     // schedule the start of the service every 10 - 30 seconds
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public static void scheduleJob(Context context) {
-        ComponentName serviceComponent = new ComponentName(context, MyJobService.class);
+        ComponentName serviceComponent = new ComponentName(context, SnapshotService.class);
         JobInfo.Builder builder = new JobInfo.Builder(0, serviceComponent);
         builder.setMinimumLatency(10 * 1000); // wait at least
         builder.setOverrideDeadline(30 * 1000); // maximum delay

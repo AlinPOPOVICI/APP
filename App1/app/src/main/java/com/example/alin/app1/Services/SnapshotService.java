@@ -4,7 +4,8 @@ import android.Manifest;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
-import android.app.Service;
+import android.app.job.JobParameters;
+import android.app.job.JobService;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
@@ -14,11 +15,11 @@ import android.location.Location;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
@@ -48,7 +49,8 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 
-public class SnapshotService extends Service {
+@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+public class SnapshotService extends JobService {
     public static final String CUSTOM_BROADCAST_ACTION = "com.example.alin.app1.Servises.SnapshotService.CUSTOM_BROADCAST_ACTION";
     private Data data;
     private DataRepository mDataRepository;
@@ -60,11 +62,11 @@ public class SnapshotService extends Service {
     private Looper looper;
     private MyServiceHandler myServiceHandler;
 
-    @Override
+    /*@Override
     public IBinder onBind(Intent intent) {
         // TODO: Return the communication channel to the service.
         throw new UnsupportedOperationException("Not yet implemented");
-    }
+    }*/
 
     @Override
     public void onCreate(){
@@ -84,18 +86,30 @@ public class SnapshotService extends Service {
 
     }
 
+    @Override
+    public boolean onStartJob(JobParameters params) {
+        Toast.makeText(this, "Getting data", Toast.LENGTH_LONG).show();
+        getSnapshots();
+        //schedule_snapshot(this.getBaseContext(),60000);
+        send_broadcast();
+        return false;
+    }
 
     @Override
+    public boolean onStopJob(JobParameters params) {
+        return false;
+    }
+
+   /* @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i("LocalService", "Received start id " + startId + ": " + intent);
+        //Log.i("LocalService", "Received start id " + startId + ": " + intent);
         Toast.makeText(this, "Getting data", Toast.LENGTH_LONG).show();
         getSnapshots();
         //schedule_snapshot(this.getBaseContext(),60000);
         send_broadcast();
         return android.app.Service.START_STICKY;
 
-    }
-
+    }*/
 
 
     public void getSnapshots() {
@@ -138,7 +152,7 @@ public class SnapshotService extends Service {
         data.setTime(calendar.getTime());
         getFineLocationSnapshots();
         mDataRepository.insert(data);
-        updateAppList(data);
+//        updateAppList(data);
         appName = getTopAppName(getApplicationContext());
 
     }
@@ -262,7 +276,7 @@ public class SnapshotService extends Service {
         getApplicationContext().startService(schedule_intent);
     }
 
-    private void send_broadcast() {
+    public void send_broadcast() {
         Log.i(TAG, "Snapshot Broadcast");
         Intent intent = new Intent(CUSTOM_BROADCAST_ACTION);
         sendBroadcast(intent, "com.example.alin.app1.FenceBroadcastReceiver");
