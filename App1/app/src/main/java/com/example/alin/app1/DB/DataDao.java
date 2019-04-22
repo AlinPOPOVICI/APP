@@ -12,7 +12,8 @@ public interface DataDao {
 
     @Query("SELECT * FROM Data")
     List<Data> getAll();
-
+    @Query("SELECT * FROM Data where  time LIKE  :date ")
+    Data findByDate(Long date);
     //@Query("SELECT * FROM Data where first_name LIKE  :firstName AND last_name LIKE :lastName")
    // Data findByName(String firstName, String lastName);
 

@@ -27,13 +27,11 @@ import android.widget.Toast;
 import com.example.alin.app1.DB.Data;
 import com.example.alin.app1.DB.DataRepository;
 import com.google.android.gms.awareness.Awareness;
-import com.google.android.gms.awareness.snapshot.BeaconStateResult;
 import com.google.android.gms.awareness.snapshot.DetectedActivityResult;
 import com.google.android.gms.awareness.snapshot.HeadphoneStateResult;
 import com.google.android.gms.awareness.snapshot.LocationResult;
 import com.google.android.gms.awareness.snapshot.PlacesResult;
 import com.google.android.gms.awareness.snapshot.WeatherResult;
-import com.google.android.gms.awareness.state.BeaconState;
 import com.google.android.gms.awareness.state.HeadphoneState;
 import com.google.android.gms.awareness.state.Weather;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -41,8 +39,11 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.places.PlaceLikelihood;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.SortedMap;
@@ -54,6 +55,7 @@ public class SnapshotService extends JobService {
     public static final String CUSTOM_BROADCAST_ACTION = "com.example.alin.app1.Servises.SnapshotService.CUSTOM_BROADCAST_ACTION";
     private Data data;
     private DataRepository mDataRepository;
+    private DatabaseReference mDatabase;
 
     private static final String TAG = "SnapshotService";
     private static final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 10001;
@@ -61,6 +63,9 @@ public class SnapshotService extends JobService {
     private boolean isRunning  = false;
     private Looper looper;
     private MyServiceHandler myServiceHandler;
+    private FirebaseAuth auth ;
+    private FirebaseUser user;
+    private int flag_done = 0;
 
     /*@Override
     public IBinder onBind(Intent intent) {
@@ -83,39 +88,44 @@ public class SnapshotService extends JobService {
 
         //getSnapshots();
         mDataRepository = new DataRepository(this.getApplication());
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        auth = FirebaseAuth.getInstance();
+        user = auth.getCurrentUser();
 
     }
 
     @Override
     public boolean onStartJob(JobParameters params) {
         Toast.makeText(this, "Getting data", Toast.LENGTH_LONG).show();
+        data = new Data();
         getSnapshots();
         //schedule_snapshot(this.getBaseContext(),60000);
+        //while(flag_done == 0){
+        //    Log.i("MAP_SETUP_DATA_007","astept");
+       // }
+       // Log.i("MAP_SETUP_DATA_007",    data.getTime().toString()+"    "+data.getLocationLatitude()+"   "+data.getLocationLatitude()+"  "+ data.getActivity()+"   "+data.getWeatherCelsius());
         send_broadcast();
         return false;
     }
 
     @Override
-    public boolean onStopJob(JobParameters params) {
-        return false;
+    public void onDestroy() {
+//        Log.i("MAP_SETUP_DATA_008",    data.getTime().toString()+"    "+data.getLocationLatitude()+"   "+data.getLocationLatitude()+"  "+ data.getActivity()+"   "+data.getWeatherCelsius());
+
+        super.onDestroy();
     }
 
-   /* @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        //Log.i("LocalService", "Received start id " + startId + ": " + intent);
-        Toast.makeText(this, "Getting data", Toast.LENGTH_LONG).show();
-        getSnapshots();
-        //schedule_snapshot(this.getBaseContext(),60000);
-        send_broadcast();
-        return android.app.Service.START_STICKY;
+    @Override
+    public boolean onStopJob(JobParameters params) {
+    //    Log.i("MAP_SETUP_DATA_008",    data.getTime().toString()+"    "+data.getLocationLatitude()+"   "+data.getLocationLatitude()+"  "+ data.getActivity()+"   "+data.getWeatherCelsius());
 
-    }*/
+        return false;
+    }
 
 
     public void getSnapshots() {
         // User Activity
-        data = new Data();
-        String appName ="";
+        String appName = "";
         Awareness.SnapshotApi.getDetectedActivity(mGoogleApiClient)
                 .setResultCallback(new ResultCallback<DetectedActivityResult>() {
                     @Override
@@ -129,36 +139,25 @@ public class SnapshotService extends JobService {
                         DetectedActivity probableActivity = arResult.getMostProbableActivity();
                         Log.i(TAG, probableActivity.toString());
                         data.setActivity(probableActivity.getType());
+                        getLocation();
                     }
                 });
-
-        // Headphones
-        Awareness.SnapshotApi.getHeadphoneState(mGoogleApiClient)
-                .setResultCallback(new ResultCallback<HeadphoneStateResult>() {
-                    @Override
-                    public void onResult(@NonNull HeadphoneStateResult headphoneStateResult) {
-                        if (!headphoneStateResult.getStatus().isSuccess()) {
-                            Log.e(TAG, "Could not detect headphone state");
-                            data.setHeadphoneState(-13);
-                            return;
-                        }
-                        HeadphoneState headphoneState = headphoneStateResult.getHeadphoneState();
-                        data.setHeadphoneState(headphoneState.getState());
-                    }
-                });
-
-        // Time (Simply get device time)
-        Calendar calendar = Calendar.getInstance();
-        data.setTime(calendar.getTime());
-        getFineLocationSnapshots();
-        mDataRepository.insert(data);
-//        updateAppList(data);
-        appName = getTopAppName(getApplicationContext());
 
     }
 
-    private void getFineLocationSnapshots() {
-        // Check for permission first
+    private void firebase(Data data){
+        String uid = "";
+        if (user != null) {
+            uid = user.getUid();
+        }
+        DatabaseReference ref = mDatabase.child("users").child(uid).child("Awareness");
+
+        //HashMap<String, Data> hashMap = new HashMap<>();
+        //hashMap.put("Data", data);
+        ref.setValue(data );
+    }
+
+    private void getLocation() {
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -169,7 +168,6 @@ public class SnapshotService extends JobService {
                     MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);*/
         } else {
             Log.i(TAG, "Fine Location permission already granted");
-
             // Location
             Awareness.SnapshotApi.getLocation(mGoogleApiClient)
                     .setResultCallback(new ResultCallback<LocationResult>() {
@@ -184,11 +182,26 @@ public class SnapshotService extends JobService {
                             Location location = locationResult.getLocation();
                             data.setLocationLatitude(location.getLatitude());
                             data.setLocationLongitude(location.getLongitude());
+                            Log.i("MAP_SETUP_DATA", location.getLongitude() + "   " + location.getLatitude());
+                            flag_done = 1;
+                            getWeather();
                         }
                     });
+        }
+    }
 
+    private void getPlaces() {
+        // Check for permission first
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
 
-            // Places
+            Log.e(TAG, "Fine Location Permission not yet granted");
+            /*ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);*/
+        } else {
+            Log.i(TAG, "Fine Location permission already granted");
             Awareness.SnapshotApi.getPlaces(mGoogleApiClient)
                     .setResultCallback(new ResultCallback<PlacesResult>() {
                         @Override
@@ -213,7 +226,23 @@ public class SnapshotService extends JobService {
                             }
                         }
                     });
+        }
+    }
 
+
+
+    private void getWeather() {
+        // Check for permission first
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            Log.e(TAG, "Fine Location Permission not yet granted");
+            /*ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);*/
+        } else {
+            Log.i(TAG, "Fine Location permission already granted");
 
 
             // Weather
@@ -228,48 +257,49 @@ public class SnapshotService extends JobService {
                                 return;
                             }
                             Weather weather = weatherResult.getWeather();
-                            if(weather != null) {
+                            if (weather != null) {
                                 data.setWeatherCelsius(weatherResult.getWeather().getTemperature(2));
                                 data.setWeatherCondition(weatherResult.getWeather().getConditions()[0]);
-                            }else{
+                                getHeadphones();
+                            } else {
                                 data.setWeatherCelsius(-13);
                                 data.setWeatherCondition(-13);
-                            }}
-                    });
-
-            //Beacon
-            List MY_BEACON_TYPE_FILTERS = Arrays.asList(
-                    BeaconState.TypeFilter.with(
-                            "my.beacon.com.sample.usingawarenessapi",
-                            "my-attachment-type"),
-                    BeaconState.TypeFilter.with(
-                            "com.androidauthority.awareness",
-                            "my-attachment-type"));
-            Awareness.SnapshotApi.getBeaconState(mGoogleApiClient, MY_BEACON_TYPE_FILTERS)
-                    .setResultCallback(new ResultCallback<BeaconStateResult>() {
-
-                        @Override
-                        public void onResult(@NonNull BeaconStateResult beaconStateResult) {
-                            if (!beaconStateResult.getStatus().isSuccess()) {
-                                Log.e(TAG, "Could not get beacon state");
-                                return;
-                            }
-                            BeaconState beaconState = beaconStateResult.getBeaconState();
-                            if(beaconState != null) {
-                                List<BeaconState.BeaconInfo> beacons = beaconState.getBeaconInfo();
-                                if (beacons != null) {
-                                    StringBuilder beaconString = new StringBuilder();
-                                    for (BeaconState.BeaconInfo info :
-                                            beacons) {
-                                        beaconString.append(info.toString());
-                                    }
-                                }
                             }
                         }
                     });
+
         }
 
+        Log.i("MAP_SETUP_DATA_2",    data.getLocationLatitude()+"   "+data.getLocationLatitude()+"  "+ data.getActivity()+"   "+data.getWeatherCelsius());
+
     }
+    public void getHeadphones(){ // Headphones
+        Awareness.SnapshotApi.getHeadphoneState(mGoogleApiClient)
+                .setResultCallback(new ResultCallback<HeadphoneStateResult>() {
+                    @Override
+                    public void onResult(@NonNull HeadphoneStateResult headphoneStateResult) {
+                        if (!headphoneStateResult.getStatus().isSuccess()) {
+                            Log.e(TAG, "Could not detect headphone state");
+                            data.setHeadphoneState(-13);
+                            return;
+                        }
+                        HeadphoneState headphoneState = headphoneStateResult.getHeadphoneState();
+                        data.setHeadphoneState(headphoneState.getState());
+                    }
+                });
+
+        // Time (Simply get device time)
+        Calendar calendar = Calendar.getInstance();
+        data.setTime(calendar.getTime());
+        data.setApp_name(getTopAppName(getApplicationContext()));
+        Log.i("MAP_SETUP_DATA_1",    data.getTime().toString()+"    "+data.getLocationLatitude()+"   "+data.getLocationLatitude()+"  "+ data.getActivity()+"   "+data.getWeatherCelsius());
+        mDataRepository.insert(data);
+        firebase(data);
+//        updateAppList(data);
+
+
+    }
+
     private void updateAppList(Data data) {
         Intent schedule_intent = new Intent(getApplicationContext(), SuggestionListService.class);
         schedule_intent.putExtra("data", data);

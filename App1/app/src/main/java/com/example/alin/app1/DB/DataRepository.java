@@ -4,6 +4,9 @@ import android.app.Application;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.example.alin.app1.DateConverter;
+
+import java.util.Date;
 import java.util.List;
 
 
@@ -13,6 +16,7 @@ public class DataRepository {
 
     private static final String TAG ="DataRepository";
     private DataDao myDao;
+    private DateConverter conv;
    // private List<Data> mAllData;
 
     public DataRepository(Application application) {
@@ -21,7 +25,11 @@ public class DataRepository {
         myDao = db.dataDao();
     }
 
+    public Data findByDate(Date date){
+        Log.i(TAG,"getDate");
+        return myDao.findByDate(conv.toTimestamp(date)) ;
 
+    }
     public List<Data> getAllData() {
         Log.i(TAG,"getAll");
         return myDao.getAll();

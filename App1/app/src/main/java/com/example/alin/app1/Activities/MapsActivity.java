@@ -4,8 +4,10 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.graphics.Color;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.example.alin.app1.DB.Data;
+import com.example.alin.app1.DB.DataRepository;
 import com.example.alin.app1.DB.DataViewModel;
 import com.example.alin.app1.R;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -24,6 +26,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     private Circle circle;
     private DataViewModel mDataViewModel;
+    private DataRepository mDataRepository;
 
 
     @Override
@@ -35,25 +38,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         mDataViewModel = ViewModelProviders.of(this).get(DataViewModel.class);
+        mDataRepository = new DataRepository(this.getApplication());
     }
 
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
-    @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        List<Data> list = (List<Data>) mDataViewModel.getAllData();
+        List<Data> list = mDataRepository.getAllData();
             if(list != null ) {
                 for (int i = 0; i < list.size(); i++) {
                     if(list.get(i).getLocationLatitude() != -13 && list.get(i).getLocationLongitude() != -13){
+                        Log.i("MAP_SETUP ", ""+i + "   "+list.get(i).getLocationLatitude()+"   "+list.get(i).getLocationLongitude());
                         circle = mMap.addCircle(new CircleOptions()
                                 .center(new LatLng(list.get(i).getLocationLatitude(), list.get(i).getLocationLongitude()))
                                 .radius(1000)

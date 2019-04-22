@@ -1,6 +1,7 @@
 package com.example.alin.app1.Activities;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -16,6 +17,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.alin.app1.DB.Data;
+import com.example.alin.app1.DB.DataRepository;
 import com.example.alin.app1.DB.DataViewModel;
 import com.example.alin.app1.R;
 import com.google.android.gms.awareness.Awareness;
@@ -29,6 +31,7 @@ import com.google.android.gms.awareness.state.BeaconState;
 import com.google.android.gms.awareness.state.HeadphoneState;
 import com.google.android.gms.awareness.state.Weather;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
@@ -44,6 +47,7 @@ public class SnapshotActivity extends AppCompatActivity {
     //private DataViewModel myViewModel;
     private Data data;
     private DataViewModel mDataViewModel;
+    private DataRepository mDataRepository;
 
     private static final String TAG = "SnapshotActivity";
     private static final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 10001;
@@ -56,8 +60,8 @@ public class SnapshotActivity extends AppCompatActivity {
     private TextView mTimeTextView;
     private TextView mWeatherTextView;
     private TextView mHeadphonesTextView;
-
-
+    private int flag_done = 0;
+    private PendingResult.StatusListener mLisener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +71,7 @@ public class SnapshotActivity extends AppCompatActivity {
                 .addApi(Awareness.API)
                 .build();
         mGoogleApiClient.connect();
+        mDataRepository = new DataRepository(this.getApplication());
 
         //myViewModel = ViewModelProviders.of(this).get(DataViewModel.class);
 
@@ -86,13 +91,14 @@ public class SnapshotActivity extends AppCompatActivity {
             }
         });
         mDataViewModel = ViewModelProviders.of(this).get(DataViewModel.class);
-
     }
 
 
+    @SuppressLint("SimpleDateFormat")
     public void getSnapshots() {
         // User Activity
         data = new Data();
+
         Awareness.SnapshotApi.getDetectedActivity(mGoogleApiClient)
                 .setResultCallback(new ResultCallback<DetectedActivityResult>() {
                     @Override
@@ -102,6 +108,7 @@ public class SnapshotActivity extends AppCompatActivity {
                             mUserActivityTextView.setText("--Could not detect user activity--");
                             mUserActivityTextView.setTextColor(Color.RED);
                             data.setActivity(-13);
+                            flag_done=1;
                             return;
                         }
                         ActivityRecognitionResult arResult = detectedActivityResult.getActivityRecognitionResult();
@@ -110,11 +117,15 @@ public class SnapshotActivity extends AppCompatActivity {
                         mUserActivityTextView.setText(probableActivity.toString());
                         mUserActivityTextView.setTextColor(Color.GREEN);
                         data.setActivity(probableActivity.getType());
+//                        Log.i("MAP_SETUP_DATA_A",    data.getTime().toString()+"    "+data.getLocationLatitude()+"   "+data.getLocationLatitude()+"  "+ data.getActivity()+"   "+data.getHeadphoneState());
+
+
                     }
                 });
 
 
         // Headphones
+        //PendingResult.StatusListener mLisener
         Awareness.SnapshotApi.getHeadphoneState(mGoogleApiClient)
                 .setResultCallback(new ResultCallback<HeadphoneStateResult>() {
                     @Override
@@ -129,6 +140,9 @@ public class SnapshotActivity extends AppCompatActivity {
 
                         HeadphoneState headphoneState = headphoneStateResult.getHeadphoneState();
                         data.setHeadphoneState(headphoneState.getState());
+
+//                        Log.i("MAP_SETUP_DATA_HP",    data.getTime().toString()+"    "+data.getLocationLatitude()+"   "+data.getLocationLatitude()+"  "+ data.getActivity()+"   "+data.getHeadphoneState());
+
                         if (headphoneState.getState() == HeadphoneState.PLUGGED_IN) {
                             mHeadphonesTextView.setText("Headphones plugged in");
                             mHeadphonesTextView.setTextColor(Color.GREEN);
@@ -143,12 +157,15 @@ public class SnapshotActivity extends AppCompatActivity {
 
 
         // Time (Simply get device time)
-        Calendar calendar = Calendar.getInstance();
-        mTimeTextView.setText(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(calendar.getTime()));
-        mTimeTextView.setTextColor(Color.GREEN);
-        data.setTime(calendar.getTime());
+      Calendar calendar = Calendar.getInstance();
+     mTimeTextView.setText(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(calendar.getTime()));
+       mTimeTextView.setTextColor(Color.GREEN);
+     // data.setTime(calendar.getTime());
         getFineLocationSnapshots();
-        mDataViewModel.insert(data);
+        //mDataViewModel.insert(data);
+
+        //Log.i("MAP_SETUP_DATA_009",    data.getTime().toString()+"    "+data.getLocationLatitude()+"   "+data.getLocationLatitude()+"  "+ data.getActivity()+"   "+data.getWeatherCelsius());
+
 
     }
 
@@ -239,6 +256,7 @@ public class SnapshotActivity extends AppCompatActivity {
                                 mWeatherTextView.setText(weather.toString());
                                 data.setWeatherCelsius(weatherResult.getWeather().getTemperature(2));
                                 data.setWeatherCondition(weatherResult.getWeather().getConditions()[0]);
+
                             }else{
                                 mWeatherTextView.setText("Could not detect weather info");
                                 mWeatherTextView.setTextColor(Color.RED);

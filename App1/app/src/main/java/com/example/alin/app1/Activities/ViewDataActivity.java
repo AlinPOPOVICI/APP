@@ -76,8 +76,9 @@ public class ViewDataActivity extends AppCompatActivity {
             for (int i = 0; i < dataList.size(); i++) {
                 String appTime = dataList.get(i).getTime().toString();
                 Log.i("APP_SETUP " + Integer.toString(i), appTime);
-
-                strList.add(appTime);
+                Log.i("MAP_SETUP_check ", ""+dataList.get(i).getLocationLatitude());
+                String finStr =  appTime + dataList.get(i).getApp_name();
+                strList.add(finStr);
 
             }
         }else{

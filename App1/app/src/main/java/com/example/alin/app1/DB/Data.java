@@ -40,9 +40,21 @@ public class Data implements Parcelable {
     @ColumnInfo (name = "location_longitude")
     private double locationLongitude;
 
+    @ColumnInfo (name = "app_name")
+    private String app_name;
+
     public Data(){
 
     }
+
+    public String getApp_name() {
+        return app_name;
+    }
+
+    public void setApp_name(String app_name) {
+        this.app_name = app_name;
+    }
+
     protected Data(Parcel in) {
         id = in.readInt();
         headphoneState = in.readInt();
@@ -51,6 +63,7 @@ public class Data implements Parcelable {
         activity = in.readInt();
         locationLatitude = in.readDouble();
         locationLongitude = in.readDouble();
+        app_name = in.readString();
     }
 
     public static final Creator<Data> CREATOR = new Creator<Data>() {
@@ -137,5 +150,6 @@ public class Data implements Parcelable {
         dest.writeInt(activity);
         dest.writeDouble(locationLatitude);
         dest.writeDouble(locationLongitude);
+        dest.writeString(app_name);
     }
 }
