@@ -22,7 +22,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.example.alin.app1.DB.Data;
 import com.example.alin.app1.DB.DataRepository;
@@ -96,7 +95,7 @@ public class SnapshotService extends JobService {
 
     @Override
     public boolean onStartJob(JobParameters params) {
-        Toast.makeText(this, "Getting data", Toast.LENGTH_LONG).show();
+        //Toast.makeText(this, "Getting data", Toast.LENGTH_LONG).show();
         data = new Data();
         getSnapshots();
         //schedule_snapshot(this.getBaseContext(),60000);
@@ -150,7 +149,7 @@ public class SnapshotService extends JobService {
         if (user != null) {
             uid = user.getUid();
         }
-        DatabaseReference ref = mDatabase.child("users").child(uid).child("Awareness");
+        DatabaseReference ref = mDatabase.child("users").child(uid).child("Awareness").child(data.getTime().toString());
 
         //HashMap<String, Data> hashMap = new HashMap<>();
         //hashMap.put("Data", data);
@@ -351,7 +350,7 @@ public class SnapshotService extends JobService {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 String currentApp = null;
                 UsageStatsManager usm = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
-                long time_end= System.currentTimeMillis();
+                long time_end = System.currentTimeMillis();
                 long time_begin = time_end - 1000*1000;
                 List<UsageStats> applist = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, time_begin, time_end);
                 if (applist == null) {
