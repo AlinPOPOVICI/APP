@@ -294,7 +294,7 @@ public class SnapshotService extends JobService {
         Log.i("MAP_SETUP_DATA_1",    data.getTime().toString()+"    "+data.getLocationLatitude()+"   "+data.getLocationLatitude()+"  "+ data.getActivity()+"   "+data.getWeatherCelsius());
         mDataRepository.insert(data);
         firebase(data);
-//        updateAppList(data);
+        updateAppList(data);
 
 
     }
@@ -363,11 +363,25 @@ public class SnapshotService extends JobService {
                 if (applist != null && applist.size() > 0) {
                     Log.i(TAG, "Current App list is not NULL ");
                     SortedMap<Long, UsageStats> mySortedMap = new TreeMap<>();
+                   // Iterator<Map.Entry<Long, UsageStats>> it = mySortedMap.entrySet().iterator();
+
                     for (UsageStats usageStats : applist) {
                         mySortedMap.put(usageStats.getLastTimeUsed(), usageStats);
                     }
                     if (mySortedMap != null && !mySortedMap.isEmpty()) {
+
+                        /*for (UsageStats us: ((TreeMap<Long, UsageStats>) mySortedMap).descendingMap().values()) {
+                            currentApp = us.getPackageName();
+                            if(!(currentApp.equals("com.miui.home")||currentApp.equals("com.example.alin.app1"))){
+                            break;
+                            }
+                        }*/
                         currentApp = mySortedMap.get(mySortedMap.lastKey()).getPackageName();
+
+                        while ((currentApp.equals("com.miui.home")||currentApp.equals("com.example.alin.app1"))){
+                            mySortedMap.remove(mySortedMap.lastKey());
+                            currentApp = mySortedMap.get(mySortedMap.lastKey()).getPackageName();
+                        }
                     }
                 }
                 Log.i(TAG, "Current App in foreground is: " + currentApp);

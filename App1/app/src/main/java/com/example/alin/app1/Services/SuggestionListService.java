@@ -2,7 +2,9 @@ package com.example.alin.app1.Services;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Build;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.example.alin.app1.DB.Aplicatie;
@@ -10,8 +12,22 @@ import com.example.alin.app1.DB.AplicatieData;
 import com.example.alin.app1.DB.AplicatieDataRepository;
 import com.example.alin.app1.DB.AplicatieRepository;
 import com.example.alin.app1.DB.Data;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.ml.common.FirebaseMLException;
+import com.google.firebase.ml.common.modeldownload.FirebaseLocalModel;
+import com.google.firebase.ml.common.modeldownload.FirebaseModelDownloadConditions;
+import com.google.firebase.ml.common.modeldownload.FirebaseModelManager;
+import com.google.firebase.ml.common.modeldownload.FirebaseRemoteModel;
+import com.google.firebase.ml.custom.FirebaseModelDataType;
+import com.google.firebase.ml.custom.FirebaseModelInputOutputOptions;
+import com.google.firebase.ml.custom.FirebaseModelInputs;
+import com.google.firebase.ml.custom.FirebaseModelInterpreter;
+import com.google.firebase.ml.custom.FirebaseModelOptions;
+import com.google.firebase.ml.custom.FirebaseModelOutputs;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class SuggestionListService extends Service {
@@ -20,6 +36,10 @@ public class SuggestionListService extends Service {
     private List<Aplicatie> appList;
     private List<AplicatieData> appDataList;
    private List<String> sList = new ArrayList<String>();
+   private FirebaseModelInputOutputOptions inputOutputOptions;
+   private FirebaseModelInterpreter firebaseInterpreter;
+
+    private static final String TAG = "SUGGESTION";
     public SuggestionListService() {
     }
 
@@ -34,25 +54,160 @@ public class SuggestionListService extends Service {
         super.onCreate();
         mAplicatieDataRepository = new AplicatieDataRepository(this.getApplication());
         mAplicatieRepository = new AplicatieRepository(this.getApplication());
+
+        //ML---------------------------------------------------------------------------------------------
+        FirebaseModelDownloadConditions.Builder conditionsBuilder =
+                new FirebaseModelDownloadConditions.Builder().requireWifi();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            // Enable advanced conditions on Android Nougat and newer.
+            conditionsBuilder = conditionsBuilder
+                    .requireCharging()
+                    .requireDeviceIdle();
+        }
+        FirebaseModelDownloadConditions conditions = conditionsBuilder.build();
+
+// Build a remote model source object by specifying the name you assigned the model
+// when you uploaded it in the Firebase console.
+        FirebaseRemoteModel cloudSource = new FirebaseRemoteModel.Builder("my_model_v1")
+                .enableModelUpdates(true)
+                .setInitialDownloadConditions(conditions)
+                .setUpdatesDownloadConditions(conditions)
+                .build();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            FirebaseModelManager.getInstance().registerRemoteModel(cloudSource);
+        }
+        //-------------------------------------------------------------------------------------------------
+        FirebaseLocalModel localSource =
+                new FirebaseLocalModel.Builder("my_model_local_v1")  // Assign a name to this model
+                        .setAssetFilePath("my_model_local_v1.tflite")
+                        .build();
+        FirebaseModelManager.getInstance().registerLocalModel(localSource);
+        //-------------------------------------------------------------------------------------------------
+        FirebaseModelOptions options = new FirebaseModelOptions.Builder()
+                //.setRemoteModelName("my_model_v1")
+                .setLocalModelName("my_model_local_v1")
+                .build();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            try {
+                 firebaseInterpreter = FirebaseModelInterpreter.getInstance(options);
+            } catch (FirebaseMLException e) {
+                e.printStackTrace();
+            }
+        }
+        //------------------------------------------------------------------------------------------------
+      /*  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            FirebaseModelManager.getInstance().ensureModelDownloaded(remoteModel)
+                    .addOnSuccessListener(
+                            new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess() {
+                                    // Model downloaded successfully. Okay to use the model.
+                                }
+                            })
+                    .addOnFailureListener(
+                            new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    // Model couldn’t be downloaded or other internal error.
+                                    // ...
+                                }
+                            });
+        }
+        *///-----------------------------------------------------------------------
+        try {
+             inputOutputOptions =
+                    new FirebaseModelInputOutputOptions.Builder()
+                            .setInputFormat(0, FirebaseModelDataType.FLOAT32, new int[]{1, 7})
+                            .setOutputFormat(0, FirebaseModelDataType.FLOAT32, new int[]{1,32})
+                            .build();
+        } catch (FirebaseMLException e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Data data = (Data) intent.getParcelableExtra("data");
         //get latest db entry
+        float[][] input = new float[1][7];
 
         if(data != null) {
-            updateAppList(data);
+            input = prepare_data(data);
+            //updateAppList(data);
+        }
+
+        FirebaseModelInputs inputs = null;
+        try {
+            inputs = new FirebaseModelInputs.Builder()
+                    .add(input)  // add() as many input arrays as your model requires
+                    .build();
+            Log.i(TAG, "Modified inputs");
+        } catch (FirebaseMLException e) {
+            e.printStackTrace();
+        }
+        try {
+            if(firebaseInterpreter == null) {
+                Log.i(TAG, "NULL Interpreter");
+            }
+            firebaseInterpreter.run(inputs, inputOutputOptions)
+                    .addOnSuccessListener(
+                            new OnSuccessListener<FirebaseModelOutputs>() {
+                                @Override
+                                public void onSuccess(FirebaseModelOutputs result) {
+                                    // ...
+                                    float[][] output = result.getOutput(0);
+                                    for (int i = 0; i<=31; i = i+1) {
+                                        Log.i(TAG, "OUTPUT: " + output[0][i]);
+
+                                    }
+                                }
+                            })
+                    .addOnFailureListener(
+                            new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.i(TAG, "FAil Run"+"   "+"    "+e.getCause());
+
+                                    // Task failed with an exception
+                                    // ...
+                                }
+                            });
+
+        } catch (FirebaseMLException e) {
+            e.printStackTrace();
         }
         // updateAppList(data);
         return android.app.Service.START_STICKY;
+    }
+
+    private float[][] prepare_data(Data d){
+        float[][] input = new float[1][7];
+        Calendar rightNow = Calendar.getInstance();
+        int currentHourIn24Format = rightNow.get(Calendar.HOUR_OF_DAY);
+        // input[0][0]= d.getTime();
+        input[0][0]= (float) currentHourIn24Format;
+        Log.i(TAG, "HOUR: " + input[0][0]);
+        input[0][1]= d.getActivity();
+        Log.i(TAG, "Activity: " +input[0][1]);
+        input[0][2]= d.getHeadphoneState();
+        Log.i(TAG, "HP: " + input[0][2]);
+        input[0][4]= (float) d.getLocationLongitude();
+        Log.i(TAG, "Lon: "+ input[0][4]);
+        input[0][3]= (float) d.getLocationLatitude();
+        Log.i(TAG, "Lat: " +input[0][3]);
+        input[0][5]= d.getWeatherCelsius();
+        Log.i(TAG, "W_t: " + input[0][5]);
+        input[0][6]= d.getWeatherCondition();
+        Log.i(TAG, "W_c: " + input[0][6]);
+        return input;
     }
 
     public void updateAppList(Data data){
         mAplicatieRepository.deleteAll();
         appDataList =  mAplicatieDataRepository.getAllData();
 
-        Log.i("SUGGESTION ","updateLIST ");
+        Log.i(TAG,"updateLIST ");
             if(appDataList != null ){
 
             if(appDataList.size() > 0) {
