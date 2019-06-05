@@ -1,10 +1,10 @@
 package com.example.alin.app1.Services;
 
-import android.app.Service;
-import android.content.Intent;
+import android.app.job.JobParameters;
+import android.app.job.JobService;
 import android.os.Build;
-import android.os.IBinder;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
 
 import com.example.alin.app1.DB.Aplicatie;
@@ -25,12 +25,14 @@ import com.google.firebase.ml.custom.FirebaseModelInputs;
 import com.google.firebase.ml.custom.FirebaseModelInterpreter;
 import com.google.firebase.ml.custom.FirebaseModelOptions;
 import com.google.firebase.ml.custom.FirebaseModelOutputs;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-public class SuggestionListService extends Service {
+@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+public class SuggestionListService extends JobService {
     private AplicatieRepository mAplicatieRepository ;
     private AplicatieDataRepository mAplicatieDataRepository ;
     private List<Aplicatie> appList;
@@ -43,11 +45,11 @@ public class SuggestionListService extends Service {
     public SuggestionListService() {
     }
 
-    @Override
+   /* @Overrid
     public IBinder onBind(Intent intent) {
         // TODO: Return the communication channel to the service.
         throw new UnsupportedOperationException("Not yet implemented");
-    }
+    }*/
 
     @Override
     public void onCreate() {
@@ -66,8 +68,6 @@ public class SuggestionListService extends Service {
         }
         FirebaseModelDownloadConditions conditions = conditionsBuilder.build();
 
-// Build a remote model source object by specifying the name you assigned the model
-// when you uploaded it in the Firebase console.
         FirebaseRemoteModel cloudSource = new FirebaseRemoteModel.Builder("my_model_v1")
                 .enableModelUpdates(true)
                 .setInitialDownloadConditions(conditions)
@@ -94,26 +94,6 @@ public class SuggestionListService extends Service {
                 e.printStackTrace();
             }
         }
-        //------------------------------------------------------------------------------------------------
-      /*  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            FirebaseModelManager.getInstance().ensureModelDownloaded(remoteModel)
-                    .addOnSuccessListener(
-                            new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess() {
-                                    // Model downloaded successfully. Okay to use the model.
-                                }
-                            })
-                    .addOnFailureListener(
-                            new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    // Model couldn’t be downloaded or other internal error.
-                                    // ...
-                                }
-                            });
-        }
-        *///-----------------------------------------------------------------------
         try {
              inputOutputOptions =
                     new FirebaseModelInputOutputOptions.Builder()
@@ -127,14 +107,24 @@ public class SuggestionListService extends Service {
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Data data = (Data) intent.getParcelableExtra("data");
+    public boolean onStartJob(JobParameters params){
+        Data data = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            String json = params.getExtras().getString("data");
+            Gson g = new Gson();
+            data = g.fromJson(json, Data.class);
+            //data = (Data) params.getExtras("data");
+            Log.i(TAG, "Got data");
+        }
         //get latest db entry
         float[][] input = new float[1][7];
 
         if(data != null) {
             input = prepare_data(data);
             //updateAppList(data);
+        }
+        else{
+            Log.i(TAG, "Null DATA");
         }
 
         FirebaseModelInputs inputs = null;
@@ -177,8 +167,14 @@ public class SuggestionListService extends Service {
         } catch (FirebaseMLException e) {
             e.printStackTrace();
         }
-        // updateAppList(data);
-        return android.app.Service.START_STICKY;
+         //updateAppList(data);
+       // return android.app.Service.START_STICKY;
+        return false;
+    }
+
+    @Override
+    public boolean onStopJob(JobParameters params) {
+        return false;
     }
 
     private float[][] prepare_data(Data d){

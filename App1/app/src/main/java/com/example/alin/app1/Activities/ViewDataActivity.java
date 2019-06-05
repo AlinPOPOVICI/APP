@@ -18,6 +18,7 @@ import com.example.alin.app1.R;
 import com.example.alin.app1.RecyclerTouchListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ViewDataActivity extends AppCompatActivity {
@@ -84,7 +85,7 @@ public class ViewDataActivity extends AppCompatActivity {
         }else{
             strList.add("NULL");
         }
-
+        Collections.reverse(strList);
         mAdapter.notifyDataSetChanged();
     }
 }

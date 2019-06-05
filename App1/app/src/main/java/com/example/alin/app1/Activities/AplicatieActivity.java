@@ -8,6 +8,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -21,7 +22,6 @@ import com.example.alin.app1.R;
 import com.example.alin.app1.Widget.WidgetProvider;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
-import com.google.android.gms.maps.model.LatLng;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -30,6 +30,7 @@ import java.util.Date;
 //preferintele pentru o anumita aplicatie
 public class AplicatieActivity extends AppCompatActivity {
 
+    private static final String TAG = "AplicatieActivity";
     private static final int PLACE_PICKER_REQUEST = 1;
     private PlacePicker.IntentBuilder builder;
     private TimePicker timePicker;
@@ -54,7 +55,7 @@ public class AplicatieActivity extends AppCompatActivity {
 
         mAppNameTextView = (TextView) findViewById(R.id.textViewAppName);
         mAppNameTextView.setText(dene.getName());
-        mAppNameTextView.setTextColor(Color.RED);
+        mAppNameTextView.setTextColor(Color.BLACK);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -72,12 +73,13 @@ public class AplicatieActivity extends AppCompatActivity {
         if (requestCode == PLACE_PICKER_REQUEST) {
             if (resultCode == RESULT_OK) {
                 Place place = PlacePicker.getPlace(data, this);
-                LatLng latlng = place.getLatLng();
+                //LatLng latlng = place.getLatLng();
                 Double latitude = place.getLatLng().latitude;
                 Double longitude = place.getLatLng().longitude;
                 dene.setLocationLatitude(latitude);
                 dene.setLocationLongitude(longitude);
-
+                Log.e(TAG, "LAT:"+dene.getLocationLatitude()+"\n");
+                Log.e(TAG, "LON:"+dene.getLocationLongitude()+"\n");
             }
         }
     }
@@ -107,10 +109,12 @@ public class AplicatieActivity extends AppCompatActivity {
                 t.setMinutes(selectedMinute);
                  //da.setTime(t);
                  dene.setTime(t);
+                Log.i(TAG, "Time:"+dene.getTime().toString()+"\n");
             }
         }, hour, minute, true);//Yes 24 hour time
         mTimePicker.setTitle("Select Time");
         mTimePicker.show();
+        //Log.e(TAG, "Time:"+dene.getTime().toString()+"\n");
 
     }
     public void save(View view){

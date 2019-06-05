@@ -11,8 +11,9 @@ import java.util.List;
 public interface AplicatieDao {
 
     @Query("SELECT * FROM Aplicatie")
+    List<Aplicatie> getAll();
     //LiveData<List<Aplicatie>> getAll();
-List<Aplicatie> getAll();
+
 
     //@Query("SELECT * FROM Data where first_name LIKE  :firstName AND last_name LIKE :lastName")
     // Data findByName(String firstName, String lastName);

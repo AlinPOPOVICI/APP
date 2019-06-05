@@ -4,10 +4,13 @@ import android.Manifest;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.app.job.JobInfo;
 import android.app.job.JobParameters;
+import android.app.job.JobScheduler;
 import android.app.job.JobService;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -17,12 +20,17 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PersistableBundle;
 import android.os.Process;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
+import com.example.alin.app1.DB.Aplicatie;
+import com.example.alin.app1.DB.AplicatieData;
+import com.example.alin.app1.DB.AplicatieDataRepository;
+import com.example.alin.app1.DB.AplicatieRepository;
 import com.example.alin.app1.DB.Data;
 import com.example.alin.app1.DB.DataRepository;
 import com.google.android.gms.awareness.Awareness;
@@ -38,10 +46,24 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.places.PlaceLikelihood;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.ml.common.FirebaseMLException;
+import com.google.firebase.ml.common.modeldownload.FirebaseLocalModel;
+import com.google.firebase.ml.common.modeldownload.FirebaseModelDownloadConditions;
+import com.google.firebase.ml.common.modeldownload.FirebaseModelManager;
+import com.google.firebase.ml.common.modeldownload.FirebaseRemoteModel;
+import com.google.firebase.ml.custom.FirebaseModelDataType;
+import com.google.firebase.ml.custom.FirebaseModelInputOutputOptions;
+import com.google.firebase.ml.custom.FirebaseModelInputs;
+import com.google.firebase.ml.custom.FirebaseModelInterpreter;
+import com.google.firebase.ml.custom.FirebaseModelOptions;
+import com.google.firebase.ml.custom.FirebaseModelOutputs;
+import com.google.gson.Gson;
 
 import java.util.Calendar;
 import java.util.List;
@@ -65,6 +87,11 @@ public class SnapshotService extends JobService {
     private FirebaseAuth auth ;
     private FirebaseUser user;
     private int flag_done = 0;
+    private FirebaseModelInputOutputOptions inputOutputOptions;
+    private FirebaseModelInterpreter firebaseInterpreter;
+    private AplicatieRepository mAplicatieRepository ;
+    private AplicatieDataRepository mAplicatieDataRepository ;
+    private List<AplicatieData> appDataList;
 
     /*@Override
     public IBinder onBind(Intent intent) {
@@ -98,7 +125,6 @@ public class SnapshotService extends JobService {
         //Toast.makeText(this, "Getting data", Toast.LENGTH_LONG).show();
         data = new Data();
         getSnapshots();
-        //schedule_snapshot(this.getBaseContext(),60000);
         //while(flag_done == 0){
         //    Log.i("MAP_SETUP_DATA_007","astept");
        // }
@@ -110,7 +136,6 @@ public class SnapshotService extends JobService {
     @Override
     public void onDestroy() {
 //        Log.i("MAP_SETUP_DATA_008",    data.getTime().toString()+"    "+data.getLocationLatitude()+"   "+data.getLocationLatitude()+"  "+ data.getActivity()+"   "+data.getWeatherCelsius());
-
         super.onDestroy();
     }
 
@@ -120,7 +145,6 @@ public class SnapshotService extends JobService {
 
         return false;
     }
-
 
     public void getSnapshots() {
         // User Activity
@@ -294,15 +318,33 @@ public class SnapshotService extends JobService {
         Log.i("MAP_SETUP_DATA_1",    data.getTime().toString()+"    "+data.getLocationLatitude()+"   "+data.getLocationLatitude()+"  "+ data.getActivity()+"   "+data.getWeatherCelsius());
         mDataRepository.insert(data);
         firebase(data);
-        updateAppList(data);
+        //updateAppList(data);
+        create_model(data);
 
 
     }
 
     private void updateAppList(Data data) {
-        Intent schedule_intent = new Intent(getApplicationContext(), SuggestionListService.class);
+        /*Intent schedule_intent = new Intent(getApplicationContext(), SuggestionListService.class);
         schedule_intent.putExtra("data", data);
-        getApplicationContext().startService(schedule_intent);
+        getApplicationContext().startService(schedule_intent);*/
+        //MyCustomObject myObj = new MyCustomObject("data", data);
+        Gson g = new Gson();
+        String json = g.toJson(data);
+
+        PersistableBundle bundle = new PersistableBundle();
+        bundle.putString("data", json);
+        ComponentName serviceComponent = new ComponentName(this.getApplicationContext(), SuggestionListService.class);
+        JobInfo.Builder builder = (JobInfo.Builder) new JobInfo.Builder(0, serviceComponent)
+                .setExtras(bundle);
+        builder.setMinimumLatency(10 * 1000); // wait at least
+        builder.setOverrideDeadline(30 * 1000); // maximum dela
+        JobScheduler jobScheduler = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            jobScheduler = this.getApplicationContext().getSystemService(JobScheduler.class);
+        }
+
+        jobScheduler.schedule(builder.build());
     }
 
     public void send_broadcast() {
@@ -398,7 +440,182 @@ public class SnapshotService extends JobService {
         }
         return strName;
     }
+    void create_model(Data ddata){
 
+        mAplicatieDataRepository = new AplicatieDataRepository(this.getApplication());
+        mAplicatieRepository = new AplicatieRepository(this.getApplication());
+        //ML---------------------------------------------------------------------------------------------
+        FirebaseModelDownloadConditions.Builder conditionsBuilder =
+                new FirebaseModelDownloadConditions.Builder().requireWifi();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            // Enable advanced conditions on Android Nougat and newer.
+            conditionsBuilder = conditionsBuilder
+                    .requireCharging()
+                    .requireDeviceIdle();
+        }
+        FirebaseModelDownloadConditions conditions = conditionsBuilder.build();
+
+        FirebaseRemoteModel cloudSource = new FirebaseRemoteModel.Builder("my_model_v1")
+                .enableModelUpdates(true)
+                .setInitialDownloadConditions(conditions)
+                .setUpdatesDownloadConditions(conditions)
+                .build();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            FirebaseModelManager.getInstance().registerRemoteModel(cloudSource);
+        }
+        //-------------------------------------------------------------------------------------------------
+        FirebaseLocalModel localSource =
+                new FirebaseLocalModel.Builder("my_model_local_v1")  // Assign a name to this model
+                        .setAssetFilePath("my_model_local_v1.tflite")
+                        .build();
+        FirebaseModelManager.getInstance().registerLocalModel(localSource);
+        //-------------------------------------------------------------------------------------------------
+        FirebaseModelOptions options = new FirebaseModelOptions.Builder()
+                //.setRemoteModelName("my_model_v1")
+                .setLocalModelName("my_model_local_v1")
+                .build();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            try {
+                firebaseInterpreter = FirebaseModelInterpreter.getInstance(options);
+            } catch (FirebaseMLException e) {
+                e.printStackTrace();
+            }
+        }
+        try {
+            inputOutputOptions =
+                    new FirebaseModelInputOutputOptions.Builder()
+                            .setInputFormat(0, FirebaseModelDataType.FLOAT32, new int[]{1, 7})
+                            .setOutputFormat(0, FirebaseModelDataType.FLOAT32, new int[]{1,32})
+                            .build();
+        } catch (FirebaseMLException e) {
+            e.printStackTrace();
+        }
+        predict(ddata);
+    }
+
+    void predict(Data ddata){
+        //get latest db entry
+        float[][] input = new float[1][7];
+
+        if(ddata != null) {
+            input = prepare_data(ddata);
+            update(ddata);
+        }
+        else{
+            Log.i(TAG, "Null DATA");
+        }
+
+        FirebaseModelInputs inputs = null;
+        try {
+            inputs = new FirebaseModelInputs.Builder()
+                    .add(input)  // add() as many input arrays as your model requires
+                    .build();
+            Log.i(TAG, "Modified inputs");
+        } catch (FirebaseMLException e) {
+            e.printStackTrace();
+        }
+        try {
+            if(firebaseInterpreter == null) {
+                Log.i(TAG, "NULL Interpreter");
+            }
+            firebaseInterpreter.run(inputs, inputOutputOptions)
+                    .addOnSuccessListener(
+                            new OnSuccessListener<FirebaseModelOutputs>() {
+                                @Override
+                                public void onSuccess(FirebaseModelOutputs result) {
+                                    // ...
+                                    float[][] output = result.getOutput(0);
+                                    for (int i = 0; i<=31; i = i+1) {
+                                        Log.i(TAG, "OUTPUT: " + output[0][i]);
+
+                                    }
+                                }
+                            })
+                    .addOnFailureListener(
+                            new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.i(TAG, "FAil Run"+"   "+"    "+e.getCause());
+
+                                    // Task failed with an exception
+                                    // ...
+                                }
+                            });
+
+        } catch (FirebaseMLException e) {
+            e.printStackTrace();
+        }
+    }
+    private float[][] prepare_data(Data d){
+        float[][] input = new float[1][7];
+        Calendar rightNow = Calendar.getInstance();
+        int currentHourIn24Format = rightNow.get(Calendar.HOUR_OF_DAY);
+        // input[0][0]= d.getTime();
+        input[0][0]= (float) currentHourIn24Format;
+        Log.i(TAG, "HOUR: " + input[0][0]);
+        input[0][1]= d.getActivity();
+        Log.i(TAG, "Activity: " +input[0][1]);
+        input[0][2]= d.getHeadphoneState();
+        Log.i(TAG, "HP: " + input[0][2]);
+        input[0][4]= (float) d.getLocationLongitude();
+        Log.i(TAG, "Lon: "+ input[0][4]);
+        input[0][3]= (float) d.getLocationLatitude();
+        Log.i(TAG, "Lat: " +input[0][3]);
+        input[0][5]= d.getWeatherCelsius();
+        Log.i(TAG, "W_t: " + input[0][5]);
+        input[0][6]= d.getWeatherCondition();
+        Log.i(TAG, "W_c: " + input[0][6]);
+        return input;
+    }
+    void update(Data ddata){
+        mAplicatieRepository.deleteAll();
+        appDataList =  mAplicatieDataRepository.getAllData();
+
+        Log.i(TAG,"updateLIST ");
+        if(appDataList != null ){
+
+            if(appDataList.size() > 0) {
+                for (int i = 0; i < appDataList.size(); i++) {
+                    AplicatieData appdata = appDataList.get(i);
+                    Aplicatie app = new Aplicatie();
+                    app.setName(appdata.getName());
+
+                    app.setPrioritate(evaluate(ddata,appdata));
+                    //appList.add(app);
+                    mAplicatieRepository.insert(app);
+                }
+            }else{
+                //sList.add("NO_DATA");
+            }
+        }else{
+            //  Aplicatie app2 = new Aplicatie();
+            // app2.setName("NO_DATA");
+            // sList.add("NULL");
+        }
+    }
+
+
+
+    public int evaluate(Data data1, AplicatieData appdata2){
+        int value= 0;
+        Log.i("SUGGESTION ","evaluate ");
+
+       /* if((data1.getActivity() != null ) && (appdata2.getActivity() != null)) {
+            if (data1.getActivity() == appdata2.getActivity()) {
+                value += 10;
+            }
+        }
+
+        if(data1.getHeadphoneState() == appdata2.getHeadphoneState()){
+            value += 10;
+        }
+
+        if(sqrt(pow(data1.getLocationLatitude() - appdata2.getLocationLatitude(),2)+pow(data1.getLocationLongitude() - appdata2.getLocationLongitude(),2))<100){
+            value += 10;
+        }
+*/
+        return value;
+    }
 
 }
 

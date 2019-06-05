@@ -115,7 +115,7 @@ public class SnapshotActivity extends AppCompatActivity {
                         DetectedActivity probableActivity = arResult.getMostProbableActivity();
                         Log.i(TAG, probableActivity.toString());
                         mUserActivityTextView.setText(probableActivity.toString());
-                        mUserActivityTextView.setTextColor(Color.GREEN);
+                        mUserActivityTextView.setTextColor(Color.BLACK);
                         data.setActivity(probableActivity.getType());
 //                        Log.i("MAP_SETUP_DATA_A",    data.getTime().toString()+"    "+data.getLocationLatitude()+"   "+data.getLocationLatitude()+"  "+ data.getActivity()+"   "+data.getHeadphoneState());
 
@@ -145,7 +145,7 @@ public class SnapshotActivity extends AppCompatActivity {
 
                         if (headphoneState.getState() == HeadphoneState.PLUGGED_IN) {
                             mHeadphonesTextView.setText("Headphones plugged in");
-                            mHeadphonesTextView.setTextColor(Color.GREEN);
+                            mHeadphonesTextView.setTextColor(Color.BLACK);
                         } else {
 
                             mHeadphonesTextView.setText("Headphones NOT plugged in");
@@ -159,7 +159,7 @@ public class SnapshotActivity extends AppCompatActivity {
         // Time (Simply get device time)
       Calendar calendar = Calendar.getInstance();
      mTimeTextView.setText(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(calendar.getTime()));
-       mTimeTextView.setTextColor(Color.GREEN);
+       mTimeTextView.setTextColor(Color.BLACK);
      // data.setTime(calendar.getTime());
         getFineLocationSnapshots();
         //mDataViewModel.insert(data);
@@ -197,7 +197,7 @@ public class SnapshotActivity extends AppCompatActivity {
                             }
                             Location location = locationResult.getLocation();
                             mLocationTextView.setText(location.toString());
-                            mLocationTextView.setTextColor(Color.GREEN);
+                            mLocationTextView.setTextColor(Color.BLACK);
                             data.setLocationLatitude(location.getLatitude());
                             data.setLocationLongitude(location.getLongitude());
                         }

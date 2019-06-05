@@ -18,7 +18,6 @@ public class Data implements Parcelable {
     @PrimaryKey(autoGenerate = true)
     public int id;
 
-
     @TypeConverters(DateConverter.class)
     private Date time;
 

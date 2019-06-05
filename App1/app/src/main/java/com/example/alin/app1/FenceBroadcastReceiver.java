@@ -19,7 +19,7 @@ import java.util.Calendar;
 /*
         Calendar cal = Calendar.getInstance();
         Intent intent = new Intent(this, ProximityAlertService.class);
-        PendingIntent pintent = PendingIntent.getService(this, 0, intent, 0);
+        PendingIntent pintent = PendingIntent.getService(tis, 0, intent, 0);
         AlarmManager alarm = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
         Log.d("Main",String.valueOf( cal.getTimeInMillis()));
         //make the alarm goes off every 10 sec (not exact help to save battery life)
@@ -46,16 +46,18 @@ public class FenceBroadcastReceiver extends BroadcastReceiver {
            // start_alarm(context, 40000);
         }
 
-        if(SnapshotService.CUSTOM_BROADCAST_ACTION.equals(action)) {
-            Log.i(TAG, "Received a FenceUpdate -  Custom ");
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                JobSC.scheduleJob(context);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            if(SnapshotService.CUSTOM_BROADCAST_ACTION.equals(action)) {
+                Log.i(TAG, "Received a FenceUpdate -  Custom ");
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    JobSC.scheduleJob(context);
+                }
+               // stop_alarm(context);
+               // start_alarm(context, 40000);
             }
-           // stop_alarm(context);
-           // start_alarm(context, 40000);
         }
 
-            if (TextUtils.equals(fenceState.getFenceKey(), AwarenessService.HEADPHONE_FENCE_KEY)) {
+        if (TextUtils.equals(fenceState.getFenceKey(), AwarenessService.HEADPHONE_FENCE_KEY)) {
             switch (fenceState.getCurrentState()) {
                 case FenceState.TRUE:
                     Log.i(TAG, "Received a FenceUpdate -  Headphones are plugged in.");
