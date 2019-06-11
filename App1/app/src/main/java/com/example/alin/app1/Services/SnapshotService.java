@@ -33,6 +33,7 @@ import com.example.alin.app1.DB.AplicatieDataRepository;
 import com.example.alin.app1.DB.AplicatieRepository;
 import com.example.alin.app1.DB.Data;
 import com.example.alin.app1.DB.DataRepository;
+import com.example.alin.app1.Widget.WidgetProvider;
 import com.google.android.gms.awareness.Awareness;
 import com.google.android.gms.awareness.snapshot.DetectedActivityResult;
 import com.google.android.gms.awareness.snapshot.HeadphoneStateResult;
@@ -70,6 +71,9 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import static java.lang.Math.pow;
+import static java.lang.Math.sqrt;
+
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class SnapshotService extends JobService {
@@ -92,7 +96,7 @@ public class SnapshotService extends JobService {
     private AplicatieRepository mAplicatieRepository ;
     private AplicatieDataRepository mAplicatieDataRepository ;
     private List<AplicatieData> appDataList;
-
+    private String[] title;
     /*@Override
     public IBinder onBind(Intent intent) {
         // TODO: Return the communication channel to the service.
@@ -117,6 +121,42 @@ public class SnapshotService extends JobService {
         mDatabase = FirebaseDatabase.getInstance().getReference();
         auth = FirebaseAuth.getInstance();
         user = auth.getCurrentUser();
+        title = new String[]{
+                "Block Puzzle ",
+                "Facebook     ",
+                "Audible      ",
+                "Messenger    ",
+                "Food Panda   ",
+                "Instagram    ",
+                "Tinder       ",
+                "MMS          ",
+                "CALL         ",
+                "Whatsapp     ",
+                "Skype        ",
+                "Achero       ",
+                "Chrome       ",
+                "Search Box   ",
+                "Wheater      ",
+                "Notes        ",
+                "Settings     ",
+                "Youtube      ",
+                "Deskclock    ",
+                "Hipmenu      ",
+                "Contacts     ",
+                "Gallery      ",
+                "ING Home Bank",
+                "Snapchat     ",
+                "Camera       ",
+                "NewPipe      ",
+                "Uber         ",
+                "Docs         ",
+                "File Manager ",
+                "Maps         ",
+                "VLC          ",
+                "Home Workout ",
+                "Excel        "
+        };
+
 
     }
 
@@ -135,12 +175,14 @@ public class SnapshotService extends JobService {
 
     @Override
     public void onDestroy() {
+      //  WidgetProvider.sendRefreshBroadcast(getApplicationContext());
 //        Log.i("MAP_SETUP_DATA_008",    data.getTime().toString()+"    "+data.getLocationLatitude()+"   "+data.getLocationLatitude()+"  "+ data.getActivity()+"   "+data.getWeatherCelsius());
         super.onDestroy();
     }
 
     @Override
     public boolean onStopJob(JobParameters params) {
+       // WidgetProvider.sendRefreshBroadcast(getApplicationContext());
     //    Log.i("MAP_SETUP_DATA_008",    data.getTime().toString()+"    "+data.getLocationLatitude()+"   "+data.getLocationLatitude()+"  "+ data.getActivity()+"   "+data.getWeatherCelsius());
 
         return false;
@@ -319,8 +361,9 @@ public class SnapshotService extends JobService {
         mDataRepository.insert(data);
         firebase(data);
         //updateAppList(data);
+        //mAplicatieRepository.deleteAll();
         create_model(data);
-
+        WidgetProvider.sendRefreshBroadcast(getApplicationContext());
 
     }
 
@@ -444,6 +487,7 @@ public class SnapshotService extends JobService {
 
         mAplicatieDataRepository = new AplicatieDataRepository(this.getApplication());
         mAplicatieRepository = new AplicatieRepository(this.getApplication());
+        mAplicatieRepository.deleteAll();
         //ML---------------------------------------------------------------------------------------------
         FirebaseModelDownloadConditions.Builder conditionsBuilder =
                 new FirebaseModelDownloadConditions.Builder().requireWifi();
@@ -525,10 +569,18 @@ public class SnapshotService extends JobService {
                                 public void onSuccess(FirebaseModelOutputs result) {
                                     // ...
                                     float[][] output = result.getOutput(0);
-                                    for (int i = 0; i<=31; i = i+1) {
-                                        Log.i(TAG, "OUTPUT: " + output[0][i]);
-
+                                    int i;
+                                    for ( i = 0; i<=31; i = i+1) {
+                                        Log.i(TAG, "OUTPUT: " + title[i] + output[0][i]*100);
+                                        Aplicatie app = new Aplicatie();
+                                        app.setName(title[i]);
+                                        app.setPrioritate(Math.round(output[0][i]*100));
+                                        //appList.add(app);
+                                        mAplicatieRepository.insert(app);
+                                        //WidgetProvider.sendRefreshBroadcast(getApplicationContext());
                                     }
+                                   // if(i == 31)
+                                      //  WidgetProvider.sendRefreshBroadcast(getApplicationContext());
                                 }
                             })
                     .addOnFailureListener(
@@ -568,7 +620,6 @@ public class SnapshotService extends JobService {
         return input;
     }
     void update(Data ddata){
-        mAplicatieRepository.deleteAll();
         appDataList =  mAplicatieDataRepository.getAllData();
 
         Log.i(TAG,"updateLIST ");
@@ -592,14 +643,28 @@ public class SnapshotService extends JobService {
             // app2.setName("NO_DATA");
             // sList.add("NULL");
         }
+       // WidgetProvider.sendRefreshBroadcast(getApplicationContext());
+
     }
 
 
 
     public int evaluate(Data data1, AplicatieData appdata2){
         int value= 0;
-        Log.i("SUGGESTION ","evaluate ");
+        Log.i(TAG,"evaluate ");
+        if (data1 != null && appdata2 !=null){
+            if(data1.getTime() != null ) {
+                if (Math.abs(data1.getTime().getHours() - appdata2.getTime().getHours()) <= 1) {
+                    return 500000;
+                }
+            }
+           if((data1.getLocationLatitude() != 0) && (appdata2.getLocationLatitude() != 0) && (data1.getLocationLongitude() != 0) && (appdata2.getLocationLongitude() != 0)) {
 
+                if (sqrt(pow(data1.getLocationLatitude() - appdata2.getLocationLatitude(), 2) + pow(data1.getLocationLongitude() - appdata2.getLocationLongitude(), 2)) < 1) {
+                    return 500001;
+                }
+            }
+       }
        /* if((data1.getActivity() != null ) && (appdata2.getActivity() != null)) {
             if (data1.getActivity() == appdata2.getActivity()) {
                 value += 10;

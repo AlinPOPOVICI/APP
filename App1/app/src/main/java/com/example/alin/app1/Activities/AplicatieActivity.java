@@ -33,7 +33,7 @@ public class AplicatieActivity extends AppCompatActivity {
     private static final String TAG = "AplicatieActivity";
     private static final int PLACE_PICKER_REQUEST = 1;
     private PlacePicker.IntentBuilder builder;
-    private TimePicker timePicker;
+    private TimePickerDialog mTimePicker;
     private Data da;
     private AplicatieData dene;
     private AplicatieDataRepository mAplicatieRepository = new AplicatieDataRepository(this.getApplication());
@@ -100,7 +100,7 @@ public class AplicatieActivity extends AppCompatActivity {
 
         int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
         int minute = mcurrentTime.get(Calendar.MINUTE);
-        TimePickerDialog mTimePicker;
+        //TimePickerDialog mTimePicker;
         mTimePicker = new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
             @Override
             public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
@@ -108,13 +108,13 @@ public class AplicatieActivity extends AppCompatActivity {
                 t.setHours(selectedHour);
                 t.setMinutes(selectedMinute);
                  //da.setTime(t);
-                 dene.setTime(t);
+                dene.setTime(t);
                 Log.i(TAG, "Time:"+dene.getTime().toString()+"\n");
             }
         }, hour, minute, true);//Yes 24 hour time
         mTimePicker.setTitle("Select Time");
         mTimePicker.show();
-        //Log.e(TAG, "Time:"+dene.getTime().toString()+"\n");
+//        Log.i(TAG, "Time:"+dene.getTime().toString()+"\n");
 
     }
     public void save(View view){

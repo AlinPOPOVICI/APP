@@ -14,6 +14,8 @@ import com.example.alin.app1.DB.AplicatieRepository;
 import com.example.alin.app1.R;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
@@ -132,12 +134,22 @@ public class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsF
     public void onDataSetChanged() {
         sList = new ArrayList<>();
         appList = (List<Aplicatie>) mAplicatieRepository.getAllData();
-        Log.i("WIDGET_R_VIEW ","in widget r2 factory ");
+        Log.i("WIDGET_R_VIEW ","in widget r2 factory appListsize:  " + appList.size());
         if(appList != null ){
+            Collections.sort(appList, new Comparator<Aplicatie>(){
+                @Override
+                public int compare(Aplicatie obj1, Aplicatie obj2) {
 
+                    // ## Descending order
+                    //return obj2.getPrioritate().compareToIgnoreCase(obj1.getPrioritate()); // To compare string values
+                    return Integer.valueOf(obj2.getPrioritate()).compareTo(Integer.valueOf(obj1.getPrioritate())); // To compare integer values
+
+                }
+            });
             if(appList.size() > 0) {
                 for (int i = 0; i < appList.size(); i++) {
                     Aplicatie app = appList.get(i);
+                    Log.i("WIDGET_R_VIEW "," appListElement:  " + appList.get(i).getName() + "  "+ appList.get(i).getPrioritate());
                     sList.add(app.getName());
                 }
             }else{
@@ -150,7 +162,9 @@ public class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsF
         }
         strList = new String[sList.size()];
         strList = sList.toArray(strList);
-        // no-op
+        for (int i = 0; i < sList.size(); i++) {
+           // Log.i("WIDGET_R_VIEW ","apps  "+ sList.size() + "  " + strList[i] );
+        }
     }
 
 }
